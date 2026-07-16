@@ -3,6 +3,21 @@ name = "pip-clock"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "clock"
+path = "src/bin/clock.rs"
+
+[[bin]]
+name = "vertical"
+path = "src/bin/vertical.rs"
+
+[[bin]]
+name = "pomodoro"
+path = "src/bin/pomodoro.rs"
+
 [dependencies]
 gpui = { path = "../../zed/crates/gpui", features = ["font-kit"] }
 gpui_platform = { path = "../../zed/crates/gpui_platform", features = ["font-kit"] }

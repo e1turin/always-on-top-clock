@@ -269,7 +269,7 @@ fn main() {
                     traffic_light_position: None,
                 }),
                 is_movable: true,
-                is_resizable: false,
+                is_resizable: true,
                 ..Default::default()
             },
             |_, cx| cx.new(|_| Pomodoro::new()),

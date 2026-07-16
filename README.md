@@ -1,45 +1,74 @@
 # PiP Clock
 
-A native macOS always-on-top clock widget built with **GPUI** (Zed's GPU-accelerated UI framework).
+Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI framework).
 
-## Features
+## Apps
 
-- Always-on-top floating window (using `WindowKind::Floating` which maps to `NSFloatingWindowLevel` on macOS)
-- GPU-accelerated rendering via Metal
-- Clean, minimal design
-- Updates every second
-- Keyboard shortcuts:
-  - `Cmd+Q` - Quit
-  - `Cmd+T` - Toggle always-on-top (requires window recreation)
+| App | Binary | Window | Description |
+|-----|--------|--------|-------------|
+| **PiP Clock** | `clock` | 300×300 | `HH:MM:SS` digital clock |
+| **PiP Vertical** | `vertical` | 300×300 | Hours over minutes in large type |
+| **PiP Pomodoro** | `pomodoro` | 300×300 | 25/5/15 min timer with session tracking |
+
+All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
+
+## Keyboard Shortcuts
+
+| Key | Clock / Vertical | Pomodoro |
+|-----|-----------------|----------|
+| `T` | Toggle black/white theme | Toggle black/white theme |
+| `Space` | — | Play / Pause |
+| `S` | — | Skip phase |
+| `R` | — | Reset |
 
 ## Building
 
+Requires macOS with Xcode (for Metal shader compilation) and a local clone of [Zed](https://github.com/zed-industries/zed) one directory above:
+
+```
+parent/
+├── zed/                  # git clone https://github.com/zed-industries/zed
+└── pip-clock/            # this repo
+```
+
 ```bash
-# From the pip-clock directory
 cargo build --release
 ```
 
 ## Running
 
 ```bash
-cargo run --release
+cargo run --release --bin clock
+cargo run --release --bin vertical
+cargo run --release --bin pomodoro
 ```
 
-Or run the built binary:
+## Creating .app Bundles
+
 ```bash
-./target/release/pip-clock
+./build-apps.sh
 ```
 
-## Notes
+Outputs `.app` bundles to `target/apps/`. Drag them to `/Applications/` to install.
 
-- Requires macOS with Xcode command line tools installed
-- Uses GPUI from the local Zed workspace (`../../zed/crates/gpui`)
-- The `Floating` window kind on macOS uses `NSFloatingWindowLevel` which keeps the window above normal windows
-- Window background is transparent with a subtle dark backdrop
+## CI / Releases
+
+GitHub Actions builds on every push to `main`. To create a release with downloadable `.app` zips:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ## Architecture
 
-- `Clock` - The clock view that renders time and date
-- `ClockApp` - Main app state handling actions and window management
-- Uses GPUI's immediate-mode rendering with retained entity state
-- Time updates driven by `request_animation_frame` + 1-second timer
+```
+src/
+├── lib.rs              # Shared Theme enum (Dark / Light)
+└── bin/
+    ├── clock.rs        # HH:MM:SS clock, ticks every second
+    ├── vertical.rs     # Large hours/minutes, ticks every second
+    └── pomodoro.rs     # Phase-based timer with UI controls
+```
+
+Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows are created with `WindowKind::PopUp` which sets `NSPopUpMenuWindowLevel` (101) and `NSWindowCollectionBehaviorCanJoinAllSpaces` — keeping the widget visible above all windows across all Spaces.

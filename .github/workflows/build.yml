@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout pip-clock
+        uses: actions/checkout@v4
+        with:
+          path: playground/pip-clock
+
+      - name: Checkout Zed
+        uses: actions/checkout@v4
+        with:
+          repository: zed-industries/zed
+          ref: main
+          path: zed
+          fetch-depth: 1
+
+      - name: Select Xcode
+        run: |
+          ls /Applications/Xcode*.app 2>/dev/null || true
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Build
+        working-directory: playground/pip-clock
+        run: cargo build --release 2>&1
+
+      - name: Create app bundles
+        working-directory: playground/pip-clock
+        run: ./build-apps.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-clock-apps
+          path: playground/pip-clock/target/apps/*.app

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PiP Clock</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #1a1a2e;
+      color: #eee;
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    }
+    canvas {
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    #pipBtn {
+      margin-top: 28px;
+      padding: 14px 36px;
+      font-size: 18px;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      background: #e94560;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    #pipBtn:hover { background: #c73a52; }
+    #pipBtn:active { transform: scale(0.97); }
+    .pip-active { background: #16c784 !important; }
+    .pip-active:hover { background: #13a86e !important; }
+  </style>
+</head>
+<body>
+
+  <canvas id="clock" width="400" height="400"></canvas>
+  <button id="pipBtn">Start PiP</button>
+  <video id="vid" muted playsinline style="display:none"></video>
+
+  <script>
+    var canvas = document.getElementById('clock');
+    var ctx = canvas.getContext('2d');
+    var btn = document.getElementById('pipBtn');
+    var video = document.getElementById('vid');
+    var pipActive = false;
+
+    function drawClock() {
+      var w = canvas.width;
+      var h = canvas.height;
+      var now = new Date();
+
+      ctx.fillStyle = '#0f3460';
+      ctx.fillRect(0, 0, w, h);
+
+      var hh = String(now.getHours()).padStart(2, '0');
+      var mm = String(now.getMinutes()).padStart(2, '0');
+      var ss = String(now.getSeconds()).padStart(2, '0');
+      var time = hh + ':' + mm + ':' + ss;
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.shadowColor = '#e94560';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#e94560';
+      ctx.font = 'bold 64px monospace';
+      ctx.fillText(time, w / 2, h / 2 - 20);
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.font = '18px monospace';
+      var dateStr = now.toLocaleDateString(undefined, {
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+      });
+      ctx.fillText(dateStr, w / 2, h / 2 + 40);
+
+      ctx.strokeStyle = 'rgba(233,69,96,0.35)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, w - 2, h - 2);
+    }
+
+    function loop() {
+      drawClock();
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    btn.addEventListener('click', function () {
+      if (pipActive) {
+        document.exitPictureInPicture().catch(function () {});
+        return;
+      }
+      var stream = canvas.captureStream(30);
+      video.srcObject = stream;
+      video.play().then(function () {
+        return video.requestPictureInPicture();
+      }).then(function () {
+        pipActive = true;
+        btn.textContent = 'Stop PiP';
+        btn.classList.add('pip-active');
+      }).catch(function (err) {
+        console.error('PiP failed:', err);
+      });
+    });
+
+    video.addEventListener('enterpictureinpicture', function () {
+      pipActive = true;
+      btn.textContent = 'Stop PiP';
+      btn.classList.add('pip-active');
+    });
+
+    video.addEventListener('leavepictureinpicture', function () {
+      pipActive = false;
+      video.srcObject = null;
+      btn.textContent = 'Start PiP';
+      btn.classList.remove('pip-active');
+    });
+  </script>
+
+</body>
+</html>

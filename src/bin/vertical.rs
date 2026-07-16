@@ -1,7 +1,7 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, rgb, size, App, Bounds, Context, Entity, FontWeight, KeyBinding,
-    Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
+    actions, div, px, size, App, Bounds, Context, FontWeight, KeyBinding, Render,
+    SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
 };
 use gpui_platform::application;
 use pip_clock::Theme;
@@ -29,10 +29,7 @@ impl VerticalClock {
 
     fn current_hm() -> (String, String) {
         let now = chrono::Local::now();
-        (
-            now.format("%H").to_string(),
-            now.format("%M").to_string(),
-        )
+        (now.format("%H").to_string(), now.format("%M").to_string())
     }
 }
 
@@ -60,22 +57,26 @@ impl Render for VerticalClock {
             .bg(bg)
             .child(
                 div()
-                    .text_size(px(100.0))
+                    .text_size(px(50.0))
                     .font_weight(FontWeight::BOLD)
                     .text_color(fg)
-                    .child(self.hours.clone()),
+                    .child(
+                        self.hours.clone()
+                    ),
             )
             .child(
                 div()
-                    .text_size(px(100.0))
+                    .text_size(px(50.0))
                     .font_weight(FontWeight::BOLD)
                     .text_color(fg)
                     .child(self.minutes.clone()),
             )
-            .on_action(cx.listener(|this: &mut VerticalClock, _: &ToggleTheme, _, cx| {
-                this.theme.toggle();
-                cx.notify();
-            }))
+            .on_action(
+                cx.listener(|this: &mut VerticalClock, _: &ToggleTheme, _, cx| {
+                    this.theme.toggle();
+                    cx.notify();
+                }),
+            )
     }
 }
 

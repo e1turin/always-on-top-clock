@@ -1,7 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, rgb, size, App, Bounds, Context, Entity, FontWeight, KeyBinding,
-    Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
+    App, Bounds, Context, FontWeight, KeyBinding, Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, size,
 };
 use gpui_platform::application;
 use pip_clock::Theme;

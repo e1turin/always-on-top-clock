@@ -1,4 +1,4 @@
-use gpui::{Hsla, rgb};
+use gpui::{rgb, Hsla};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Theme {

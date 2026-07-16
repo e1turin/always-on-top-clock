@@ -1,11 +1,10 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, rgb, size, App, Bounds, Context, Entity, FontWeight, KeyBinding,
-    Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
+    App, Bounds, Context, FontWeight, KeyBinding, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
 };
 use gpui_platform::application;
 use pip_clock::Theme;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 actions!(pomo, [ToggleTheme, PlayPause, Skip, Reset]);
 
@@ -165,11 +164,7 @@ impl Render for Pomodoro {
                             .justify_center()
                             .children((0..4).map(|i| {
                                 let color = if i < completed { accent } else { dim };
-                                div()
-                                    .w_2()
-                                    .h_2()
-                                    .rounded_full()
-                                    .bg(color)
+                                div().w_2().h_2().rounded_full().bg(color)
                             })),
                     ),
             )
@@ -257,7 +252,7 @@ impl Render for Pomodoro {
 
 fn main() {
     application().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(300.0), px(300.0)), cx);
+        let bounds = Bounds::centered(None, size(px(200.0), px(200.0)), cx);
 
         cx.open_window(
             WindowOptions {
@@ -269,7 +264,7 @@ fn main() {
                     traffic_light_position: None,
                 }),
                 is_movable: true,
-                is_resizable: true,
+                is_resizable: false,
                 ..Default::default()
             },
             |_, cx| cx.new(|_| Pomodoro::new()),

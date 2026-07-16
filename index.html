@@ -127,6 +127,7 @@
     var FONT = "500 72px -apple-system, Helvetica, system-ui, sans-serif";
     var FONT_SM = "500 36px -apple-system, Helvetica, system-ui, sans-serif";
     var FONT_LG = "500 88px -apple-system, Helvetica, system-ui, sans-serif";
+    var FONT_XL = "500 120px -apple-system, Helvetica, system-ui, sans-serif";
     var FONT_LABEL = "600 18px -apple-system, Helvetica, system-ui, sans-serif";
     tcPlay.textContent = "\u25B6";
     document.getElementById("tcSkip").textContent = "\u23ED";
@@ -164,8 +165,8 @@
       var now = new Date();
       var hh = String(now.getHours()).padStart(2, "0");
       var mm = String(now.getMinutes()).padStart(2, "0");
-      drawChars(hh, FONT, 52, 154);
-      drawChars(mm, FONT, 52, 246);
+      drawChars(hh, FONT_XL, 84, 135);
+      drawChars(mm, FONT_XL, 84, 275);
     }
 
     // ---- Pomodoro ----

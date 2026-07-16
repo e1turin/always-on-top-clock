@@ -1,8 +1,9 @@
-name: Build
+name: Build & Release
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 jobs:
@@ -23,20 +24,31 @@ jobs:
           fetch-depth: 1
 
       - name: Select Xcode
-        run: |
-          ls /Applications/Xcode*.app 2>/dev/null || true
-          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Build
         working-directory: playground/pip-clock
-        run: cargo build --release 2>&1
+        run: cargo build --release
 
       - name: Create app bundles
         working-directory: playground/pip-clock
         run: ./build-apps.sh
 
+      - name: Zip apps
+        working-directory: playground/pip-clock/target/apps
+        run: |
+          for app in *.app; do
+            zip -r "${app%.app}.zip" "$app"
+          done
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: pip-clock-apps
-          path: playground/pip-clock/target/apps/*.app
+          path: playground/pip-clock/target/apps/*.zip
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: playground/pip-clock/target/apps/*.zip

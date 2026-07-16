@@ -103,10 +103,11 @@
   <div id="controls">
     <button class="mode-btn active" data-mode="clock">Clock</button>
     <button class="mode-btn" data-mode="vertical">Vertical</button>
-    <button class="mode-btn" data-mode="timer">Timer</button>
+    <button class="mode-btn" data-mode="pomodoro">Pomodoro</button>
   </div>
   <div id="timerControls">
     <button class="tc-btn" id="tcPlay" title="Play / Pause"></button>
+    <button class="tc-btn" id="tcSkip" title="Skip"></button>
     <button class="tc-btn" id="tcReset" title="Reset"></button>
   </div>
   <button id="pipBtn">Start PiP</button>
@@ -123,12 +124,12 @@
     var pipActive = false;
     var stream = null;
     var currentMode = "clock";
-    var timerRunning = false;
-    var timerAccumulated = 0;
-    var timerStart = 0;
     var FONT = "500 72px -apple-system, Helvetica, system-ui, sans-serif";
     var FONT_SM = "500 36px -apple-system, Helvetica, system-ui, sans-serif";
+    var FONT_LG = "500 88px -apple-system, Helvetica, system-ui, sans-serif";
+    var FONT_LABEL = "600 18px -apple-system, Helvetica, system-ui, sans-serif";
     tcPlay.textContent = "\u25B6";
+    document.getElementById("tcSkip").textContent = "\u23ED";
     tcReset.textContent = "\u21BA";
 
     function clearCanvas() {
@@ -167,42 +168,99 @@
       drawChars(mm, FONT, 52, 246);
     }
 
-    function getTimerMs() {
-      if (timerRunning) {
-        return timerAccumulated + (performance.now() - timerStart);
+    // ---- Pomodoro ----
+    // Phases: 0=w1 1=b1 2=w2 3=b2 4=w3 5=b3 6=w4 7=longbreak
+    var POMO_WORK = 25 * 60;
+    var POMO_BREAK = 5 * 60;
+    var POMO_LONG = 15 * 60;
+    var pomoPhase = 0;
+    var pomoRemaining = POMO_WORK;
+    var pomoRunning = false;
+    var pomoLastTick = 0;
+
+    function pomoPhaseName() {
+      if (pomoPhase === 7) return "LONG BREAK";
+      if (pomoPhase % 2 === 1) return "BREAK";
+      return "WORK";
+    }
+
+    function pomoPhaseDuration() {
+      if (pomoPhase === 7) return POMO_LONG;
+      if (pomoPhase % 2 === 1) return POMO_BREAK;
+      return POMO_WORK;
+    }
+
+    function pomoAdvance() {
+      pomoPhase++;
+      if (pomoPhase > 7) pomoPhase = 0;
+      pomoRemaining = pomoPhaseDuration();
+    }
+
+    function pomoCompletedSessions() {
+      return Math.floor((pomoPhase + 1) / 2);
+    }
+
+    function drawPomodoroMode() {
+      // tick the countdown
+      if (pomoRunning) {
+        var now = performance.now();
+        var elapsed = (now - pomoLastTick) / 1000;
+        pomoLastTick = now;
+        pomoRemaining -= elapsed;
+        if (pomoRemaining <= 0) {
+          pomoRemaining = 0;
+          pomoRunning = false;
+          tcPlay.textContent = "\u25B6";
+          pomoAdvance();
+        }
       }
-      return timerAccumulated;
+
+      var remaining = Math.max(0, pomoRemaining);
+      var mins = String(Math.floor(remaining / 60)).padStart(2, "0");
+      var secs = String(Math.floor(remaining % 60)).padStart(2, "0");
+
+      // phase label
+      drawChars(pomoPhaseName(), FONT_LABEL, 24, 110);
+
+      // countdown
+      drawChars(mins + ":" + secs, FONT_LG, 52, 195);
+
+      // session dots
+      var completed = Math.floor(pomoPhase / 2);
+      if (pomoPhase === 7) completed = 4;
+      var dotY = 280;
+      var dotSpacing = 22;
+      var totalDotsW = 4 * dotSpacing;
+      var dotStartX = (400 - totalDotsW) / 2 + dotSpacing / 2;
+      for (var i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.arc(dotStartX + i * dotSpacing, dotY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = i < completed ? "#fff" : "rgba(255,255,255,0.2)";
+        ctx.fill();
+      }
     }
 
-    function formatTimer(ms) {
-      var totalSec = Math.floor(ms / 1000);
-      var minutes = String(Math.floor(totalSec / 60)).padStart(2, "0");
-      var seconds = String(totalSec % 60).padStart(2, "0");
-      var tenths = String(Math.floor((ms % 1000) / 100));
-      return { main: minutes + ":" + seconds, sub: "." + tenths };
-    }
-
-    function drawTimerMode() {
-      var t = formatTimer(getTimerMs());
-      drawChars(t.main, FONT, 52, 182);
-      drawChars(t.sub, FONT_SM, 28, 242);
-    }
-
-    tcPlay.addEventListener("click", function() {
-      if (timerRunning) {
-        timerAccumulated += performance.now() - timerStart;
-        timerRunning = false;
+    document.getElementById("tcPlay").addEventListener("click", function() {
+      if (pomoRunning) {
+        pomoRunning = false;
         tcPlay.textContent = "\u25B6";
       } else {
-        timerStart = performance.now();
-        timerRunning = true;
+        pomoLastTick = performance.now();
+        pomoRunning = true;
         tcPlay.textContent = "\u23F8";
       }
     });
 
+    document.getElementById("tcSkip").addEventListener("click", function() {
+      pomoRunning = false;
+      tcPlay.textContent = "\u25B6";
+      pomoAdvance();
+    });
+
     tcReset.addEventListener("click", function() {
-      timerRunning = false;
-      timerAccumulated = 0;
+      pomoRunning = false;
+      pomoPhase = 0;
+      pomoRemaining = POMO_WORK;
       tcPlay.textContent = "\u25B6";
     });
 
@@ -210,7 +268,7 @@
       clearCanvas();
       if (currentMode === "clock") drawClockMode();
       else if (currentMode === "vertical") drawVerticalMode();
-      else if (currentMode === "timer") drawTimerMode();
+      else if (currentMode === "pomodoro") drawPomodoroMode();
       requestAnimationFrame(loop);
     }
     loop();
@@ -221,7 +279,7 @@
         modeBtns.forEach(function(x) { x.classList.remove("active"); });
         b.classList.add("active");
         currentMode = b.getAttribute("data-mode");
-        timerControlsEl.style.display = currentMode === "timer" ? "flex" : "none";
+        timerControlsEl.style.display = currentMode === "pomodoro" ? "flex" : "none";
       });
     });
 

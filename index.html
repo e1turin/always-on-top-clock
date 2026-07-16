@@ -14,115 +14,263 @@
       min-height: 100vh;
       background: #1a1a2e;
       color: #eee;
-      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-family: -apple-system, Helvetica, system-ui, sans-serif;
     }
-    canvas {
+    #wrap {
+      position: relative;
+      width: 400px;
+      height: 400px;
       border-radius: 12px;
+      overflow: hidden;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
+    #clock {
+      display: block;
+      border-radius: 12px;
+      background: #000;
+    }
+    #pipVideo {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #000;
+      display: none;
+    }
+    #controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .mode-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+    }
+    .mode-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    .mode-btn.active { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
     #pipBtn {
-      margin-top: 28px;
-      padding: 14px 36px;
-      font-size: 18px;
+      margin-top: 16px;
+      padding: 12px 32px;
+      font-size: 16px;
       font-family: inherit;
       border: none;
       border-radius: 8px;
       background: #e94560;
       color: #fff;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
     }
     #pipBtn:hover { background: #c73a52; }
-    #pipBtn:active { transform: scale(0.97); }
     .pip-active { background: #16c784 !important; }
     .pip-active:hover { background: #13a86e !important; }
+    #hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      display: none;
+    }
+    #timerControls {
+      margin-top: 12px;
+      display: none;
+      gap: 10px;
+    }
+    .tc-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tc-btn:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
-
-  <canvas id="clock" width="400" height="400"></canvas>
+  <div id="wrap">
+    <canvas id="clock" width="400" height="400"></canvas>
+    <video id="pipVideo" muted playsinline autoplay controls></video>
+  </div>
+  <div id="controls">
+    <button class="mode-btn active" data-mode="clock">Clock</button>
+    <button class="mode-btn" data-mode="vertical">Vertical</button>
+    <button class="mode-btn" data-mode="timer">Timer</button>
+  </div>
+  <div id="timerControls">
+    <button class="tc-btn" id="tcPlay" title="Play / Pause"></button>
+    <button class="tc-btn" id="tcReset" title="Reset"></button>
+  </div>
   <button id="pipBtn">Start PiP</button>
-  <video id="vid" muted playsinline style="display:none"></video>
-
+  <p id="hint">Hover the clock and click the PiP icon</p>
   <script>
-    var canvas = document.getElementById('clock');
-    var ctx = canvas.getContext('2d');
-    var btn = document.getElementById('pipBtn');
-    var video = document.getElementById('vid');
+    var canvas = document.getElementById("clock");
+    var ctx = canvas.getContext("2d");
+    var btn = document.getElementById("pipBtn");
+    var video = document.getElementById("pipVideo");
+    var hint = document.getElementById("hint");
+    var timerControlsEl = document.getElementById("timerControls");
+    var tcPlay = document.getElementById("tcPlay");
+    var tcReset = document.getElementById("tcReset");
     var pipActive = false;
+    var stream = null;
+    var currentMode = "clock";
+    var timerRunning = false;
+    var timerAccumulated = 0;
+    var timerStart = 0;
+    var FONT = "500 72px -apple-system, Helvetica, system-ui, sans-serif";
+    var FONT_SM = "500 36px -apple-system, Helvetica, system-ui, sans-serif";
+    tcPlay.textContent = "\u25B6";
+    tcReset.textContent = "\u21BA";
 
-    function drawClock() {
-      var w = canvas.width;
-      var h = canvas.height;
-      var now = new Date();
-
-      ctx.fillStyle = '#0f3460';
-      ctx.fillRect(0, 0, w, h);
-
-      var hh = String(now.getHours()).padStart(2, '0');
-      var mm = String(now.getMinutes()).padStart(2, '0');
-      var ss = String(now.getSeconds()).padStart(2, '0');
-      var time = hh + ':' + mm + ':' + ss;
-
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      ctx.shadowColor = '#e94560';
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = '#e94560';
-      ctx.font = 'bold 64px monospace';
-      ctx.fillText(time, w / 2, h / 2 - 20);
-
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,255,0.45)';
-      ctx.font = '18px monospace';
-      var dateStr = now.toLocaleDateString(undefined, {
-        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-      });
-      ctx.fillText(dateStr, w / 2, h / 2 + 40);
-
-      ctx.strokeStyle = 'rgba(233,69,96,0.35)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(1, 1, w - 2, h - 2);
+    function clearCanvas() {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, 400, 400);
     }
 
+    function drawChars(str, font, charW, y) {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#fff";
+      ctx.font = font;
+      var chars = str.split("");
+      var totalW = chars.length * charW;
+      var startX = (400 - totalW) / 2 + charW / 2;
+      for (var i = 0; i < chars.length; i++) {
+        ctx.fillText(chars[i], startX + i * charW, y);
+      }
+    }
+
+    function drawClockMode() {
+      var now = new Date();
+      var hh = String(now.getHours()).padStart(2, "0");
+      var mm = String(now.getMinutes()).padStart(2, "0");
+      var ss = String(now.getSeconds()).padStart(2, "0");
+      drawChars(hh + ":" + mm + ":" + ss, FONT, 42, 200);
+    }
+
+    function drawVerticalMode() {
+      var now = new Date();
+      var hh = String(now.getHours()).padStart(2, "0");
+      var mm = String(now.getMinutes()).padStart(2, "0");
+      drawChars(hh, FONT, 52, 154);
+      drawChars(mm, FONT, 52, 246);
+    }
+
+    function getTimerMs() {
+      if (timerRunning) {
+        return timerAccumulated + (performance.now() - timerStart);
+      }
+      return timerAccumulated;
+    }
+
+    function formatTimer(ms) {
+      var totalSec = Math.floor(ms / 1000);
+      var minutes = String(Math.floor(totalSec / 60)).padStart(2, "0");
+      var seconds = String(totalSec % 60).padStart(2, "0");
+      var tenths = String(Math.floor((ms % 1000) / 100));
+      return { main: minutes + ":" + seconds, sub: "." + tenths };
+    }
+
+    function drawTimerMode() {
+      var t = formatTimer(getTimerMs());
+      drawChars(t.main, FONT, 52, 182);
+      drawChars(t.sub, FONT_SM, 28, 242);
+    }
+
+    tcPlay.addEventListener("click", function() {
+      if (timerRunning) {
+        timerAccumulated += performance.now() - timerStart;
+        timerRunning = false;
+        tcPlay.textContent = "\u25B6";
+      } else {
+        timerStart = performance.now();
+        timerRunning = true;
+        tcPlay.textContent = "\u23F8";
+      }
+    });
+
+    tcReset.addEventListener("click", function() {
+      timerRunning = false;
+      timerAccumulated = 0;
+      tcPlay.textContent = "\u25B6";
+    });
+
     function loop() {
-      drawClock();
+      clearCanvas();
+      if (currentMode === "clock") drawClockMode();
+      else if (currentMode === "vertical") drawVerticalMode();
+      else if (currentMode === "timer") drawTimerMode();
       requestAnimationFrame(loop);
     }
     loop();
 
-    btn.addEventListener('click', function () {
-      if (pipActive) {
-        document.exitPictureInPicture().catch(function () {});
-        return;
-      }
-      var stream = canvas.captureStream(30);
-      video.srcObject = stream;
-      video.play().then(function () {
-        return video.requestPictureInPicture();
-      }).then(function () {
-        pipActive = true;
-        btn.textContent = 'Stop PiP';
-        btn.classList.add('pip-active');
-      }).catch(function (err) {
-        console.error('PiP failed:', err);
+    var modeBtns = document.querySelectorAll(".mode-btn");
+    modeBtns.forEach(function(b) {
+      b.addEventListener("click", function() {
+        modeBtns.forEach(function(x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        currentMode = b.getAttribute("data-mode");
+        timerControlsEl.style.display = currentMode === "timer" ? "flex" : "none";
       });
     });
 
-    video.addEventListener('enterpictureinpicture', function () {
+    btn.addEventListener("click", function() {
+      if (pipActive) { stopPiP(); return; }
+      stream = canvas.captureStream(25);
+      video.srcObject = stream;
+      video.style.display = "block";
+      function onReady() {
+        video.play().then(function() {
+          return video.requestPictureInPicture();
+        }).then(function() {
+          setPipActive();
+        }).catch(function() {
+          setPipActive();
+          hint.style.display = "block";
+        });
+      }
+      if (video.readyState >= 2) onReady();
+      else {
+        video.addEventListener("loadeddata", function handler() {
+          video.removeEventListener("loadeddata", handler);
+          onReady();
+        });
+        setTimeout(function() { if (!pipActive) onReady(); }, 1500);
+      }
+    });
+
+    function setPipActive() {
       pipActive = true;
-      btn.textContent = 'Stop PiP';
-      btn.classList.add('pip-active');
-    });
+      btn.textContent = "Stop PiP";
+      btn.classList.add("pip-active");
+    }
 
-    video.addEventListener('leavepictureinpicture', function () {
-      pipActive = false;
+    function stopPiP() {
+      if (document.pictureInPictureElement) {
+        document.exitPictureInPicture().catch(function() {});
+      }
+      if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
       video.srcObject = null;
-      btn.textContent = 'Start PiP';
-      btn.classList.remove('pip-active');
-    });
-  </script>
+      video.style.display = "none";
+      pipActive = false;
+      btn.textContent = "Start PiP";
+      btn.classList.remove("pip-active");
+      hint.style.display = "none";
+    }
 
+    video.addEventListener("enterpictureinpicture", function() { setPipActive(); });
+    video.addEventListener("leavepictureinpicture", function() { stopPiP(); });
+  </script>
 </body>
 </html>

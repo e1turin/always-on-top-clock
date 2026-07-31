@@ -114,7 +114,6 @@ impl Render for Pomodoro {
 
         let bg = self.theme.bg();
         let fg = self.theme.fg();
-        let muted = self.theme.muted();
         let dim = self.theme.dim();
         let accent = if self.is_break() {
             rgb(0xcc3333).into()

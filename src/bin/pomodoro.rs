@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    App, Bounds, Context, FontWeight, KeyBinding, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
+    App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
 };
 use gpui_platform::application;
 use pip_clock::Theme;
@@ -251,7 +251,7 @@ impl Render for Pomodoro {
 }
 
 fn main() {
-    application().run(|cx: &mut App| {
+    application().with_quit_mode(QuitMode::LastWindowClosed).run(|cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(200.0), px(200.0)), cx);
 
         cx.open_window(

@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, size, App, Bounds, Context, FontWeight, KeyBinding, Render,
+    actions, div, px, size, App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render,
     SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
 };
 use gpui_platform::application;
@@ -81,7 +81,7 @@ impl Render for VerticalClock {
 }
 
 fn main() {
-    application().run(|cx: &mut App| {
+    application().with_quit_mode(QuitMode::LastWindowClosed).run(|cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(300.0), px(300.0)), cx);
 
         cx.open_window(

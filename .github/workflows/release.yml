@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag to release (e.g. v1.0.0). The tag must have a successful Build workflow run.'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Get commit SHA of tag
+        id: tag_sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Find successful Build run for tag
+        id: find_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow build.yml \
+            --commit "${{ steps.tag_sha.outputs.sha }}" \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+          if [ -z "$run_id" ]; then
+            echo "::error::No successful Build workflow run found for tag ${{ inputs.tag }}. Push the tag to trigger a build, or run the Build workflow manually."
+            exit 1
+          fi
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Download app zips
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download --repo "${{ github.repository }}" "${{ steps.find_run.outputs.run_id }}" --name apps --dir apps
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.tag }}" apps/*.zip --verify-tag --generate-notes

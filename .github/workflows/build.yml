@@ -1,12 +1,10 @@
-name: Build & Release
+name: Build
 
 on:
-  # push:
-  #   branches: [main]
-  #   tags: ['v*']
+  push:
+    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
-
-
 
 jobs:
   build:
@@ -43,11 +41,9 @@ jobs:
             zip -r "${app%.app}.zip" "$app"
           done
 
-      - name: Create release
-        working-directory: playground/pip-clock/target/apps
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "v0.1" \
-            --title "PiP Clocks" \
-            pomodoro.zip
+      - name: Upload app zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: apps
+          path: playground/pip-clock/target/apps/*.zip
+          if-no-files-found: error

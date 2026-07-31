@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, size,
+    App, Bounds, Context, FontWeight, QuitMode, Render, SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, size,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
@@ -82,10 +82,7 @@ fn main() {
             },
             |_, cx| cx.new(|_| Clock::new()),
         )
-        .unwrap();
-
+        .expect("failed to open window");
         cx.activate(true);
-        cx.on_action(|_: &ToggleTheme, _cx| {});
-        cx.bind_keys([KeyBinding::new("t", ToggleTheme, None)]);
     });
 }

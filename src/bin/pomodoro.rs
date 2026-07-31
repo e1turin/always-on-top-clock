@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
+    App, Bounds, Context, FontWeight, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
@@ -11,6 +11,12 @@ actions!(pomo, [ToggleTheme, PlayPause, Skip, Reset]);
 const WORK_SECONDS: f64 = 25.0 * 60.0;
 const BREAK_SECONDS: f64 = 5.0 * 60.0;
 const LONG_BREAK_SECONDS: f64 = 15.0 * 60.0;
+
+const HEX: u32 = 0xcc3333;
+
+const WINDOW_IS_RESIZABLE: bool = false;
+const WINDOW_SIZE_X_PX: f32 = 200.0;
+const WINDOW_SIZE_Y_PX: f32 = 200.0;
 
 struct Pomodoro {
     phase: u8,
@@ -116,7 +122,7 @@ impl Render for Pomodoro {
         let fg = self.theme.fg();
         let dim = self.theme.dim();
         let accent = if self.is_break() {
-            rgb(0xcc3333).into()
+            rgb(HEX).into()
         } else {
             fg
         };
@@ -252,8 +258,7 @@ impl Render for Pomodoro {
 
 fn main() {
     application().with_quit_mode(QuitMode::LastWindowClosed).run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(200.0), px(200.0)), cx);
-
+        let bounds = Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
@@ -264,23 +269,12 @@ fn main() {
                     traffic_light_position: None,
                 }),
                 is_movable: true,
-                is_resizable: false,
+                is_resizable: WINDOW_IS_RESIZABLE,
                 ..Default::default()
             },
             |_, cx| cx.new(|_| Pomodoro::new()),
         )
-        .unwrap();
-
+        .expect("failed to open window");
         cx.activate(true);
-        cx.on_action(|_: &ToggleTheme, _cx| {});
-        cx.on_action(|_: &PlayPause, _cx| {});
-        cx.on_action(|_: &Skip, _cx| {});
-        cx.on_action(|_: &Reset, _cx| {});
-        cx.bind_keys([
-            KeyBinding::new("t", ToggleTheme, None),
-            KeyBinding::new("space", PlayPause, None),
-            KeyBinding::new("s", Skip, None),
-            KeyBinding::new("r", Reset, None),
-        ]);
     });
 }

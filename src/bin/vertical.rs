@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, size, App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render,
+    actions, div, px, size, App, Bounds, Context, FontWeight, QuitMode, Render,
     SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
 };
 use gpui_platform::application;
@@ -101,10 +101,7 @@ fn main() {
             },
             |_, cx| cx.new(|_| VerticalClock::new()),
         )
-        .unwrap();
-
+        .expect("failed to open window");
         cx.activate(true);
-        cx.on_action(|_: &ToggleTheme, _cx| {});
-        cx.bind_keys([KeyBinding::new("t", ToggleTheme, None)]);
     });
 }

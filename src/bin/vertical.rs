@@ -4,7 +4,7 @@ use gpui::{
     SharedString, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
 };
 use gpui_platform::application;
-use pip_clock::Theme;
+use pip_clock::{tabular_figures, Theme};
 use std::time::{Duration, Instant};
 
 actions!(vertical, [ToggleTheme]);
@@ -59,6 +59,7 @@ impl Render for VerticalClock {
                 div()
                     .text_size(px(50.0))
                     .font_weight(FontWeight::BOLD)
+                    .font_features(tabular_figures())
                     .text_color(fg)
                     .child(
                         self.hours.clone()
@@ -68,6 +69,7 @@ impl Render for VerticalClock {
                 div()
                     .text_size(px(50.0))
                     .font_weight(FontWeight::BOLD)
+                    .font_features(tabular_figures())
                     .text_color(fg)
                     .child(self.minutes.clone()),
             )

@@ -1,9 +1,16 @@
-use gpui::{rgb, Hsla};
+use gpui::{rgb, FontFeatures, Hsla};
+use std::sync::Arc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Theme {
     Dark,
     Light,
+}
+
+/// Enables the OpenType `tnum` (tabular figures) feature, making all digits
+/// equally wide so clock numbers don't shift when digits change.
+pub fn tabular_figures() -> FontFeatures {
+    FontFeatures(Arc::new(vec![("tnum".into(), 1)]))
 }
 
 impl Default for Theme {

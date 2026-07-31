@@ -3,7 +3,7 @@ use gpui::{
     App, Bounds, Context, FontWeight, KeyBinding, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
 };
 use gpui_platform::application;
-use pip_clock::Theme;
+use pip_clock::{tabular_figures, Theme};
 use std::time::Instant;
 
 actions!(pomo, [ToggleTheme, PlayPause, Skip, Reset]);
@@ -152,6 +152,7 @@ impl Render for Pomodoro {
                             .mt_1()
                             .text_3xl()
                             .font_weight(FontWeight::BOLD)
+                            .font_features(tabular_figures())
                             .text_color(accent)
                             .child(countdown),
                     )

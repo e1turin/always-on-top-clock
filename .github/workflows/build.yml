@@ -64,7 +64,7 @@ jobs:
         working-directory: playground/pip-clock/target/apps
         run: |
           for app in *.app; do
-            zip -r "${app%.app}.zip" "$app"
+            ditto -c -k --sequesterRsrc --keepParent "$app" "${app%.app}.zip"
           done
 
       - name: Upload app zips

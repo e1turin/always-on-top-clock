@@ -47,6 +47,9 @@ PLIST
 
     cp "$BINARY_DIR/$bin_name" "$app_dir/Contents/MacOS/"
     chmod +x "$app_dir/Contents/MacOS/$bin_name"
+    # The linker leaves binaries with an ad-hoc stub signature. Sign the bundle so
+    # Gatekeeper does not treat it as damaged.
+    codesign --force --deep --sign - "$app_dir"
     echo "Created $app_dir"
 }
 

@@ -23,6 +23,32 @@ jobs:
           path: zed
           fetch-depth: 1
 
+      - name: Resolve Zed commit
+        id: zed_sha
+        run: echo "sha=$(git -C zed rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Get Rust version
+        id: rustc_version
+        run: echo "version=$(rustc -vV | awk '/^release:/{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('playground/pip-clock/Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-${{ runner.os }}-
+
+      - name: Cache target directory
+        uses: actions/cache@v4
+        with:
+          path: playground/pip-clock/target
+          key: target-${{ runner.os }}-${{ runner.arch }}-${{ steps.rustc_version.outputs.version }}-${{ steps.zed_sha.outputs.sha }}
+          restore-keys: |
+            target-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 

@@ -47,7 +47,13 @@ jobs:
       - name: Download app zips
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download --repo "${{ github.repository }}" "${{ steps.find_run.outputs.run_id }}" --name apps --dir apps
+        run: |
+          has_apps=$(gh api "repos/${{ github.repository }}/actions/runs/${{ steps.find_run.outputs.run_id }}/artifacts" --jq '[.artifacts[] | select(.name == "apps")] | length')
+          if [ "$has_apps" -eq 0 ]; then
+            echo "::error::Build run ${{ steps.find_run.outputs.run_id }} has no 'apps' artifact, so it was created with an older version of the Build workflow. Re-tag the release commit (or create a new tag) so its build uses the current build.yml, wait for the build to finish, then re-run this workflow."
+            exit 1
+          fi
+          gh run download --repo "${{ github.repository }}" "${{ steps.find_run.outputs.run_id }}" --name apps --dir apps
 
       - name: Create release
         env:

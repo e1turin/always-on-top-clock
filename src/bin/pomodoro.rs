@@ -33,7 +33,7 @@ impl Pomodoro {
             remaining: WORK_SECONDS,
             running: false,
             last_tick: None,
-            theme: Theme::Dark,
+            theme: Default::default(),
         }
     }
 

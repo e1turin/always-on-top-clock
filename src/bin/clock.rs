@@ -19,7 +19,7 @@ impl Clock {
         Self {
             time_text: Self::current_time().into(),
             last_update: Instant::now(),
-            theme: Theme::Dark,
+            theme: Default::default(),
         }
     }
 

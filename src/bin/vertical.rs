@@ -23,7 +23,7 @@ impl VerticalClock {
             hours: h.into(),
             minutes: m.into(),
             last_update: Instant::now(),
-            theme: Theme::Dark,
+            theme: Default::default(),
         }
     }
 

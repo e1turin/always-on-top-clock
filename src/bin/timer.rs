@@ -27,7 +27,7 @@ impl Timer {
             accumulated: Duration::ZERO,
             started_at: None,
             running: false,
-            theme: Theme::Dark,
+            theme: Default::default(),
         }
     }
 

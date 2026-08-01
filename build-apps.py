@@ -27,6 +27,7 @@ APPS = [
     App(binary="clock", name="PiP Clock", bundle_id="com.pip-clock.clock"),
     App(binary="vertical", name="PiP Vertical", bundle_id="com.pip-clock.vertical"),
     App(binary="pomodoro", name="PiP Pomodoro", bundle_id="com.pip-clock.pomodoro"),
+    App(binary="timer", name="PiP Timer", bundle_id="com.pip-clock.timer"),
 ]
 
 INFO_PLIST_TEMPLATE = """\

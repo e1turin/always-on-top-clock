@@ -9,17 +9,18 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Clock** | `clock` | 300×300 | `HH:MM:SS` digital clock |
 | **PiP Vertical** | `vertical` | 300×300 | Hours over minutes in large type |
 | **PiP Pomodoro** | `pomodoro` | 300×300 | 25/5/15 min timer with session tracking |
+| **PiP Timer** | `timer` | 300×300 | Stopwatch with stop/start and reset controls |
 
 All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
 
 ## Keyboard Shortcuts
 
-| Key | Clock / Vertical | Pomodoro |
-|-----|-----------------|----------|
-| `T` | Toggle black/white theme | Toggle black/white theme |
-| `Space` | — | Play / Pause |
-| `S` | — | Skip phase |
-| `R` | — | Reset |
+| Key | Clock / Vertical | Pomodoro | Timer |
+|-----|-----------------|----------|-------|
+| `T` | Toggle black/white theme | Toggle black/white theme | Toggle black/white theme |
+| `Space` | — | Play / Pause | Stop / Start |
+| `S` | — | Skip phase | — |
+| `R` | — | Reset | Reset |
 
 ## Building
 
@@ -41,6 +42,7 @@ cargo build --release
 cargo run --release --bin clock
 cargo run --release --bin vertical
 cargo run --release --bin pomodoro
+cargo run --release --bin timer
 ```
 
 ## Creating .app Bundles
@@ -79,7 +81,7 @@ To publish a release:
 
 2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
-The release is versioned by the tag and attaches each app as a separate zip: `PiP Clock.zip`, `PiP Vertical.zip`, `PiP Pomodoro.zip`.
+The release is versioned by the tag and attaches each app as a separate zip: `PiP Clock.zip`, `PiP Vertical.zip`, `PiP Pomodoro.zip`, `PiP Timer.zip`.
 
 ## Architecture
 
@@ -89,7 +91,8 @@ src/
 └── bin/
     ├── clock.rs        # HH:MM:SS clock, ticks every second
     ├── vertical.rs     # Large hours/minutes, ticks every second
-    └── pomodoro.rs     # Phase-based timer with UI controls
+    ├── pomodoro.rs     # Phase-based timer with UI controls
+    └── timer.rs        # Stopwatch with stop/start and reset controls
 ```
 
 Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows are created with `WindowKind::PopUp` which sets `NSPopUpMenuWindowLevel` (101) and `NSWindowCollectionBehaviorCanJoinAllSpaces` — keeping the widget visible above all windows across all Spaces.

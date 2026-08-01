@@ -57,7 +57,7 @@ jobs:
 
       - name: Create app bundles
         working-directory: playground/pip-clock
-        run: ./build-apps.sh
+        run: python3 build-apps.py
 
       - name: Zip apps
         working-directory: playground/pip-clock/target/apps

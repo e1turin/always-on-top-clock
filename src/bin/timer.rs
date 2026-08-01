@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 actions!(timer_actions, [ToggleTheme, Stop, Reset]);
 
-const WINDOW_IS_RESIZABLE: bool = true;
+const WINDOW_IS_RESIZABLE: bool = false;
 const WINDOW_SIZE_X_PX: f32 = 150.0;
 const WINDOW_SIZE_Y_PX: f32 = 150.0;
 
@@ -80,7 +80,6 @@ impl Render for Timer {
             .flex_col()
             .items_center()
             .justify_center()
-            // .gap_4()
             .size_full()
             .bg(bg)
             .child(
@@ -94,23 +93,19 @@ impl Render for Timer {
             .child(
                 div()
                     .flex()
-                    .gap_10()
-                    // .justify_center()
+                    .gap_4()
                     .child(
                         div()
                             .id("stop")
                             .px_2()
-                            // .h_8()
                             .rounded_full()
                             .border_1()
                             .border_color(accent)
+                            .border_dashed()
                             .flex()
-                            // .items_center()
-                            // .justify_center()
                             .text_sm()
                             .text_color(accent)
                             .font_weight(FontWeight::BOLD)
-                            .font_features(tabular_figures())
                             .child(stop_label)
                             .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
                                 this.toggle_stop();
@@ -121,18 +116,16 @@ impl Render for Timer {
                         div()
                             .id("reset")
                             .px_2()
-                            // .py_3()
-                            // .h_5()
                             .rounded_full()
                             .border_1()
                             .border_color(accent)
+                            .border_dashed()
                             .flex()
                             .items_center()
                             .justify_center()
                             .text_sm()
                             .text_color(accent)
                             .font_weight(FontWeight::BOLD)
-                            .font_features(tabular_figures())
                             .child("↺")
                             .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
                                 this.reset();
@@ -140,18 +133,6 @@ impl Render for Timer {
                             })),
                     ),
             )
-            .on_action(cx.listener(|this: &mut Timer, _: &ToggleTheme, _, cx| {
-                this.theme.toggle();
-                cx.notify();
-            }))
-            .on_action(cx.listener(|this: &mut Timer, _: &Stop, _, cx| {
-                this.toggle_stop();
-                cx.notify();
-            }))
-            .on_action(cx.listener(|this: &mut Timer, _: &Reset, _, cx| {
-                this.reset();
-                cx.notify();
-            }))
     }
 }
 

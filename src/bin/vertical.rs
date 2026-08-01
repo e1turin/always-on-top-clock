@@ -73,12 +73,6 @@ impl Render for VerticalClock {
                     .text_color(fg)
                     .child(self.minutes.clone()),
             )
-            .on_action(
-                cx.listener(|this: &mut VerticalClock, _: &ToggleTheme, _, cx| {
-                    this.theme.toggle();
-                    cx.notify();
-                }),
-            )
     }
 }
 

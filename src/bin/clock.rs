@@ -56,10 +56,6 @@ impl Render for Clock {
                     .text_color(fg)
                     .child(self.time_text.clone()),
             )
-            .on_action(cx.listener(|this: &mut Clock, _: &ToggleTheme, _, cx| {
-                this.theme.toggle();
-                cx.notify();
-            }))
     }
 }
 

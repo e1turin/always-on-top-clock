@@ -13,15 +13,6 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 
 All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
 
-## Keyboard Shortcuts
-
-| Key | Clock / Vertical | Pomodoro | Timer |
-|-----|-----------------|----------|-------|
-| `T` | Toggle black/white theme | Toggle black/white theme | Toggle black/white theme |
-| `Space` | — | Play / Pause | Stop / Start |
-| `S` | — | Skip phase | — |
-| `R` | — | Reset | Reset |
-
 ## Building
 
 Requires macOS with Xcode (for Metal shader compilation) and a local clone of [Zed](https://github.com/zed-industries/zed) one directory above:

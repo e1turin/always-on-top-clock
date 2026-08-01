@@ -237,22 +237,6 @@ impl Render for Pomodoro {
                             })),
                     ),
             )
-            .on_action(cx.listener(|this: &mut Pomodoro, _: &ToggleTheme, _, cx| {
-                this.theme.toggle();
-                cx.notify();
-            }))
-            .on_action(cx.listener(|this: &mut Pomodoro, _: &PlayPause, _, cx| {
-                this.toggle_play();
-                cx.notify();
-            }))
-            .on_action(cx.listener(|this: &mut Pomodoro, _: &Skip, _, cx| {
-                this.skip();
-                cx.notify();
-            }))
-            .on_action(cx.listener(|this: &mut Pomodoro, _: &Reset, _, cx| {
-                this.reset();
-                cx.notify();
-            }))
     }
 }
 

@@ -8,10 +8,12 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 |-----|--------|--------|-------------|
 | **PiP Clock** | `clock` | 300×300 | `HH:MM:SS` digital clock |
 | **PiP Vertical** | `vertical` | 300×300 | Hours over minutes in large type |
-| **PiP Pomodoro** | `pomodoro` | 300×300 | 25/5/15 min timer with session tracking |
-| **PiP Timer** | `timer` | 300×300 | Stopwatch with stop/start and reset controls |
+| **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
+| **PiP Timer** | `timer` | 150×150 | Stopwatch with stop/start and reset controls |
 
 All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
+
+![](./misc/preview.png)
 
 ## Building
 

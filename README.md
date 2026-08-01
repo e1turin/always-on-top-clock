@@ -46,14 +46,14 @@ cargo run --release --bin pomodoro
 ## Creating .app Bundles
 
 ```bash
-./build-apps.sh
+./build-apps.py
 ```
 
 Outputs `.app` bundles to `target/apps/`. Drag them to `/Applications/` to install.
 
 ## Gatekeeper
 
-The bundles are signed ad-hoc during `build-apps.sh`, so macOS won't treat them as damaged. However, because they are not signed with a Developer ID or notarized, the first time you open a downloaded app you'll get the "Apple cannot check it for malicious software" dialog. To open it:
+The bundles are signed ad-hoc during `build-apps.py`, so macOS won't treat them as damaged. However, because they are not signed with a Developer ID or notarized, the first time you open a downloaded app you'll get the "Apple cannot check it for malicious software" dialog. To open it:
 
 - Right-click the app and choose **Open**, then confirm, or
 - Remove the quarantine flag from the command line:
@@ -66,18 +66,18 @@ For a fully seamless install (no warning at all), the app needs to be signed wit
 
 ## CI / Releases
 
-The `Build` workflow runs on every push to `main` and on `v*` tags. It builds all three apps and uploads the `.app` zips as a build artifact. It does not create releases.
+The `Build` workflow runs on every push to `main`. It builds all apps and uploads the `.app` zips as a build artifact. It does not create releases.
 
 To publish a release:
 
-1. Tag a commit and push the tag — this triggers a `Build` run for the tag:
+1. Tag a commit and push the tag:
 
    ```bash
    git tag v1.0.0
    git push origin v1.0.0
    ```
 
-2. Once that build succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
+2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
 The release is versioned by the tag and attaches each app as a separate zip: `PiP Clock.zip`, `PiP Vertical.zip`, `PiP Pomodoro.zip`.
 

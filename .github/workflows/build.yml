@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: macos-14
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout pip-clock
         uses: actions/checkout@v4
@@ -30,6 +33,9 @@ jobs:
         id: rustc_version
         run: echo "version=$(rustc -vV | awk '/^release:/{print $2}')" >> "$GITHUB_OUTPUT"
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.11
+
       - name: Cache Cargo registry
         uses: actions/cache@v4
         with:
@@ -39,14 +45,6 @@ jobs:
           key: cargo-registry-${{ runner.os }}-${{ hashFiles('playground/pip-clock/Cargo.lock') }}
           restore-keys: |
             cargo-registry-${{ runner.os }}-
-
-      - name: Cache target directory
-        uses: actions/cache@v4
-        with:
-          path: playground/pip-clock/target
-          key: target-${{ runner.os }}-${{ runner.arch }}-${{ steps.rustc_version.outputs.version }}-${{ steps.zed_sha.outputs.sha }}
-          restore-keys: |
-            target-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
@@ -65,6 +63,9 @@ jobs:
           for app in *.app; do
             ditto -c -k --sequesterRsrc --keepParent "$app" "${app%.app}.zip"
           done
+
+      - name: Show sccache stats
+        run: sccache --show-stats
 
       - name: Upload app zips
         uses: actions/upload-artifact@v4

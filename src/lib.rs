@@ -15,7 +15,15 @@ pub fn tabular_figures() -> FontFeatures {
 
 impl Default for Theme {
     fn default() -> Self {
-        Theme::Dark
+        #[cfg(feature = "light-theme")]
+        {
+            Theme::Light
+        }
+
+        #[cfg(not(feature = "light-theme"))]
+        {
+            Theme::Dark
+        }
     }
 }
 

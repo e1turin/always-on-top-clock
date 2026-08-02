@@ -22,6 +22,10 @@ path = "src/bin/pomodoro.rs"
 name = "timer"
 path = "src/bin/timer.rs"
 
+[features]
+default = []
+light-theme = []
+
 [dependencies]
 gpui = { path = "../../zed/crates/gpui", features = ["font-kit"] }
 gpui_platform = { path = "../../zed/crates/gpui_platform", features = ["font-kit"] }

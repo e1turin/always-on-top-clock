@@ -25,8 +25,11 @@ parent/
 └── pip-clock/            # this repo
 ```
 
+The default build is dark. The `light-theme` Cargo feature selects the light theme at compile time:
+
 ```bash
-cargo build --release
+cargo build --release                         # dark (default)
+cargo build --release --features light-theme  # light
 ```
 
 ## Running
@@ -40,11 +43,18 @@ cargo run --release --bin timer
 
 ## Creating .app Bundles
 
+`build-apps.py` only assembles app bundles; it does not compile Rust. Build both variants into the directories it expects, then run the script:
+
 ```bash
+mkdir -p target/binaries/{dark,light}
+cargo build --release
+find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/dark/ \;
+cargo build --release --features light-theme
+find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/light/ \;
 ./build-apps.py
 ```
 
-Outputs `.app` bundles to `target/apps/`. Drag them to `/Applications/` to install.
+Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Drag them to `/Applications/` to install.
 
 ## Gatekeeper
 
@@ -74,7 +84,7 @@ To publish a release:
 
 2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
-The release is versioned by the tag and attaches each app as a separate zip: `PiP Clock.zip`, `PiP Vertical.zip`, `PiP Pomodoro.zip`, `PiP Timer.zip`.
+The release is versioned by the tag and attaches each dark app and its light counterpart as a separate zip: `Clock.zip`, `Clock Light.zip`, `Vertical Clock.zip`, `Vertical Clock Light.zip`, `Pomodoro Timer.zip`, `Pomodoro Timer Light.zip`, `Timer.zip`, and `Timer Light.zip`.
 
 ## Architecture
 

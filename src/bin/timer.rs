@@ -18,6 +18,8 @@ struct Timer {
     /// When the current running stretch started.
     started_at: Option<Instant>,
     running: bool,
+    /// How many times the timer has been reset.
+    reset_count: u32,
     theme: Theme,
 }
 
@@ -27,6 +29,7 @@ impl Timer {
             accumulated: Duration::ZERO,
             started_at: None,
             running: false,
+            reset_count: 0,
             theme: Default::default(),
         }
     }
@@ -51,6 +54,7 @@ impl Timer {
 
     fn reset(&mut self) {
         self.accumulated = Duration::ZERO;
+        self.reset_count += 1;
         if self.running {
             self.started_at = Some(Instant::now());
         }
@@ -66,6 +70,7 @@ impl Render for Timer {
 
         let bg = self.theme.bg();
         let fg = self.theme.fg();
+        let muted = self.theme.muted();
         let accent = fg;
 
         let elapsed = self.elapsed();
@@ -73,7 +78,8 @@ impl Render for Timer {
         let minutes = (elapsed.as_secs() / 60) % 60;
         let seconds = elapsed.as_secs() % 60;
         let time_text = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-        let stop_label = if self.running { "⏸" } else { "▶" };
+        let stop_label = if self.running { " ⏸" } else { "▶" };
+        let reset_counter_text = format!("{}", self.reset_count);
 
         div()
             .flex()
@@ -93,14 +99,13 @@ impl Render for Timer {
             .child(
                 div()
                     .flex()
+                    .items_center()
                     .gap_4()
                     .child(
                         div()
                             .id("stop")
                             .px_2()
                             .rounded_full()
-                            .border_1()
-                            .border_color(accent)
                             .border_dashed()
                             .flex()
                             .text_sm()
@@ -117,8 +122,6 @@ impl Render for Timer {
                             .id("reset")
                             .px_2()
                             .rounded_full()
-                            .border_1()
-                            .border_color(accent)
                             .border_dashed()
                             .flex()
                             .items_center()
@@ -131,6 +134,17 @@ impl Render for Timer {
                                 this.reset();
                                 cx.notify();
                             })),
+                    )
+                    .child(
+                        div()
+                            .w_6()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .text_sm()
+                            .font_features(tabular_figures())
+                            .text_color(muted)
+                            .child(reset_counter_text),
                     ),
             )
     }

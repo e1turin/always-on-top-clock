@@ -11,7 +11,7 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
 | **PiP Timer** | `timer` | 150×150 | Stopwatch with stop/start and reset controls |
 
-All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
+The clock and Pomodoro widgets use `WindowKind::PopUp` to remain visible across Spaces and full-screen apps. The timer uses an activating `WindowKind::Floating` panel so its `Cmd+N` and `Cmd+W` shortcuts receive keyboard focus reliably. All widgets are draggable and remain above normal windows.
 
 ![](./misc/preview.png)
 
@@ -41,20 +41,28 @@ cargo run --release --bin pomodoro
 cargo run --release --bin timer
 ```
 
+Timer keyboard shortcuts:
+
+- `Cmd+N` opens another independent timer window.
+- `Cmd+W` closes the active timer window.
+
 ## Creating .app Bundles
 
-`build-apps.py` only assembles app bundles; it does not compile Rust. Build both variants into the directories it expects, then run the script:
+Run the build script to compile all binaries in both dark and light variants, assemble their application bundles, and sign them ad hoc:
 
 ```bash
-mkdir -p target/binaries/{dark,light}
-cargo build --release
-find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/dark/ \;
-cargo build --release --features light-theme
-find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/light/ \;
 ./build-apps.py
 ```
 
-Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Drag them to `/Applications/` to install.
+The script enables GPUI runtime shaders, so it does not require the optional command-line Metal toolchain. Intermediate binaries are staged in `target/binaries/{dark,light}`.
+
+To assemble bundles from binaries that are already staged there without rebuilding, use:
+
+```bash
+./build-apps.py --skip-build
+```
+
+Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Drag them to `/Applications` to install.
 
 ## Gatekeeper
 
@@ -98,4 +106,4 @@ src/
     └── timer.rs        # Stopwatch with stop/start and reset controls
 ```
 
-Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows are created with `WindowKind::PopUp` which sets `NSPopUpMenuWindowLevel` (101) and `NSWindowCollectionBehaviorCanJoinAllSpaces` — keeping the widget visible above all windows across all Spaces.
+Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Clock and Pomodoro windows use `WindowKind::PopUp`; timer windows use `WindowKind::Floating` so macOS treats them as activating panels and routes keyboard shortcuts correctly.

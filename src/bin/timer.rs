@@ -1,19 +1,23 @@
 use gpui::prelude::*;
 use gpui::{
-    actions, div, px, size, App, Bounds, Context, FontWeight, QuitMode, Render, TitlebarOptions,
-    Window, WindowBounds, WindowKind, WindowOptions,
+    actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
+    MenuItem, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
 use std::time::{Duration, Instant};
 
-actions!(timer_actions, [ToggleTheme, Stop, Reset]);
+actions!(
+    timer_actions,
+    [ToggleTheme, Stop, Reset, NewWindow, CloseWindow]
+);
 
 const WINDOW_IS_RESIZABLE: bool = false;
 const WINDOW_SIZE_X_PX: f32 = 150.0;
 const WINDOW_SIZE_Y_PX: f32 = 150.0;
 
 struct Timer {
+    focus_handle: FocusHandle,
     /// Time accumulated while stopped.
     accumulated: Duration,
     /// When the current running stretch started.
@@ -25,8 +29,12 @@ struct Timer {
 }
 
 impl Timer {
-    fn new() -> Self {
+    fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let focus_handle = cx.focus_handle();
+        focus_handle.focus(window, cx);
+
         Self {
+            focus_handle,
             accumulated: Duration::ZERO,
             started_at: None,
             running: false,
@@ -80,6 +88,7 @@ impl Render for Timer {
         let bg = self.theme.bg();
         let fg = self.theme.fg();
         let muted = self.theme.muted();
+        let dim = self.theme.dim();
         let accent = fg;
 
         if self.showing_intervals {
@@ -104,6 +113,8 @@ impl Render for Timer {
                 .collect::<Vec<_>>();
 
             div()
+                .on_action(|_: &CloseWindow, window, _| window.remove_window())
+                .track_focus(&self.focus_handle)
                 .relative()
                 .size_full()
                 .bg(bg)
@@ -135,9 +146,12 @@ impl Render for Timer {
                         .items_center()
                         .justify_center()
                         .text_lg()
+                        .rounded_full()
+                        .bg(dim)
+                        .shadow_sm()
                         .font_weight(FontWeight::BOLD)
                         .text_color(accent)
-                        .child("<")
+                        .child("←")
                         .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
                             this.showing_intervals = false;
                             cx.notify();
@@ -149,6 +163,8 @@ impl Render for Timer {
             let interval_count_text = self.intervals.len().to_string();
 
             div()
+                .on_action(|_: &CloseWindow, window, _| window.remove_window())
+                .track_focus(&self.focus_handle)
                 .flex()
                 .flex_col()
                 .items_center()
@@ -223,29 +239,59 @@ impl Render for Timer {
     }
 }
 
+fn open_timer_window(cx: &mut App) {
+    let mut bounds = Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
+    let cascade_offset = px((cx.windows().len() % 8) as f32 * 16.0);
+    bounds.origin.x += cascade_offset;
+    bounds.origin.y += cascade_offset;
+
+    cx.open_window(
+        WindowOptions {
+            window_bounds: Some(WindowBounds::Windowed(bounds)),
+            // PopUp windows are non-activating macOS panels and cannot reliably
+            // receive keyboard shortcuts after another timer is opened.
+            kind: WindowKind::Floating,
+            titlebar: Some(TitlebarOptions {
+                title: Some("PiP Timer".into()),
+                appears_transparent: true,
+                traffic_light_position: Some(point(px(-200.0), px(8.0))),
+            }),
+            is_movable: true,
+            is_resizable: WINDOW_IS_RESIZABLE,
+            is_minimizable: false,
+            ..Default::default()
+        },
+        |window, cx| cx.new(|cx| Timer::new(window, cx)),
+    )
+    .expect("failed to open window");
+    cx.activate(true);
+}
+
+fn close_active_window(cx: &mut App) {
+    let window = cx.active_window().or_else(|| {
+        cx.window_stack()
+            .and_then(|windows| windows.first().copied())
+    });
+
+    if let Some(window) = window {
+        let _ = window.update(cx, |_, window, _| window.remove_window());
+    }
+}
+
 fn main() {
     application()
         .with_quit_mode(QuitMode::LastWindowClosed)
         .run(|cx: &mut App| {
-            let bounds =
-                Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
-
-            cx.open_window(
-                WindowOptions {
-                    window_bounds: Some(WindowBounds::Windowed(bounds)),
-                    kind: WindowKind::PopUp,
-                    titlebar: Some(TitlebarOptions {
-                        title: Some("PiP Timer".into()),
-                        appears_transparent: true,
-                        traffic_light_position: None,
-                    }),
-                    is_movable: true,
-                    is_resizable: WINDOW_IS_RESIZABLE,
-                    ..Default::default()
-                },
-                |_, cx| cx.new(|_| Timer::new()),
-            )
-            .expect("failed to open window");
-            cx.activate(true);
+            cx.bind_keys([
+                KeyBinding::new("cmd-n", NewWindow, None),
+                KeyBinding::new("cmd-w", CloseWindow, None),
+            ]);
+            cx.set_menus([Menu::new("Timer").items([
+                MenuItem::action("New Timer", NewWindow),
+                MenuItem::action("Close Timer", CloseWindow),
+            ])]);
+            cx.on_action(|_: &NewWindow, cx| open_timer_window(cx));
+            cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            open_timer_window(cx);
         });
 }

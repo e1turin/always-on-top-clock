@@ -9,7 +9,7 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Clock** | `clock` | 300×300 | `HH:MM:SS` digital clock |
 | **PiP Vertical** | `vertical` | 300×300 | Hours over minutes in large type |
 | **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
-| **PiP Timer** | `timer` | 150×150 | Stopwatch with stop/start and reset controls |
+| **PiP Stopwatch** | `stopwatch` | 150×150 | Stopwatch with stop/start, reset, and interval history controls |
 
 All widgets use activating `WindowKind::Floating` panels. They are draggable, remain above normal windows, hide their traffic-light controls, and reliably receive keyboard shortcuts.
 
@@ -38,7 +38,7 @@ cargo build --release --features light-theme  # light
 cargo run --release --bin clock
 cargo run --release --bin vertical
 cargo run --release --bin pomodoro
-cargo run --release --bin timer
+cargo run --release --bin stopwatch
 ```
 
 Keyboard shortcuts available in every app:
@@ -93,7 +93,7 @@ To publish a release:
 
 2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
-The release is versioned by the tag and attaches each dark app and its light counterpart as a separate zip: `Clock.zip`, `Clock Light.zip`, `Vertical Clock.zip`, `Vertical Clock Light.zip`, `Pomodoro Timer.zip`, `Pomodoro Timer Light.zip`, `Timer.zip`, and `Timer Light.zip`.
+The release is versioned by the tag and attaches each dark app and its light counterpart as a separate zip: `Clock.zip`, `Clock Light.zip`, `Vertical Clock.zip`, `Vertical Clock Light.zip`, `Pomodoro Timer.zip`, `Pomodoro Timer Light.zip`, `Stopwatch.zip`, and `Stopwatch Light.zip`.
 
 ## Architecture
 
@@ -104,7 +104,7 @@ src/
     ├── clock.rs        # HH:MM:SS clock, ticks every second
     ├── vertical.rs     # Large hours/minutes, ticks every second
     ├── pomodoro.rs     # Phase-based timer with UI controls
-    └── timer.rs        # Stopwatch with stop/start and reset controls
+    └── stopwatch.rs    # Stopwatch with stop/start, reset, and interval history controls
 ```
 
 Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::Floating` so macOS treats them as activating panels and routes keyboard shortcuts correctly.

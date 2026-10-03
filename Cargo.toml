@@ -19,8 +19,8 @@ name = "pomodoro"
 path = "src/bin/pomodoro.rs"
 
 [[bin]]
-name = "timer"
-path = "src/bin/timer.rs"
+name = "stopwatch"
+path = "src/bin/stopwatch.rs"
 
 [features]
 default = []

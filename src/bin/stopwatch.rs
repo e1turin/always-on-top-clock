@@ -8,7 +8,7 @@ use pip_clock::{tabular_figures, Theme};
 use std::time::{Duration, Instant};
 
 actions!(
-    timer_actions,
+    stopwatch_actions,
     [ToggleTheme, Stop, Reset, NewWindow, CloseWindow, Quit]
 );
 
@@ -16,7 +16,7 @@ const WINDOW_IS_RESIZABLE: bool = false;
 const WINDOW_SIZE_X_PX: f32 = 150.0;
 const WINDOW_SIZE_Y_PX: f32 = 150.0;
 
-struct Timer {
+struct Stopwatch {
     focus_handle: FocusHandle,
     /// Time accumulated while stopped.
     accumulated: Duration,
@@ -28,7 +28,7 @@ struct Timer {
     theme: Theme,
 }
 
-impl Timer {
+impl Stopwatch {
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let focus_handle = cx.focus_handle();
         focus_handle.focus(window, cx);
@@ -78,7 +78,7 @@ impl Timer {
     }
 }
 
-impl Render for Timer {
+impl Render for Stopwatch {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         if self.running {
             cx.notify();
@@ -152,7 +152,7 @@ impl Render for Timer {
                         .font_weight(FontWeight::BOLD)
                         .text_color(accent)
                         .child("←")
-                        .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
+                        .on_click(cx.listener(|this: &mut Stopwatch, _, _, cx| {
                             this.showing_intervals = false;
                             cx.notify();
                         })),
@@ -195,7 +195,7 @@ impl Render for Timer {
                                 .font_features(tabular_figures())
                                 .text_color(muted)
                                 .child(interval_count_text)
-                                .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
+                                .on_click(cx.listener(|this: &mut Stopwatch, _, _, cx| {
                                     this.showing_intervals = true;
                                     cx.notify();
                                 })),
@@ -211,7 +211,7 @@ impl Render for Timer {
                                 .text_color(accent)
                                 .font_weight(FontWeight::BOLD)
                                 .child(stop_label)
-                                .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
+                                .on_click(cx.listener(|this: &mut Stopwatch, _, _, cx| {
                                     this.toggle_stop();
                                     cx.notify();
                                 })),
@@ -229,7 +229,7 @@ impl Render for Timer {
                                 .text_color(accent)
                                 .font_weight(FontWeight::BOLD)
                                 .child("↺")
-                                .on_click(cx.listener(|this: &mut Timer, _, _, cx| {
+                                .on_click(cx.listener(|this: &mut Stopwatch, _, _, cx| {
                                     this.reset();
                                     cx.notify();
                                 })),
@@ -239,7 +239,7 @@ impl Render for Timer {
     }
 }
 
-fn open_timer_window(cx: &mut App) {
+fn open_stopwatch_window(cx: &mut App) {
     let mut bounds = Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
     let cascade_offset = px((cx.windows().len() % 8) as f32 * 16.0);
     bounds.origin.x += cascade_offset;
@@ -249,10 +249,10 @@ fn open_timer_window(cx: &mut App) {
         WindowOptions {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
             // PopUp windows are non-activating macOS panels and cannot reliably
-            // receive keyboard shortcuts after another timer is opened.
+            // receive keyboard shortcuts after another stopwatch is opened.
             kind: WindowKind::Floating,
             titlebar: Some(TitlebarOptions {
-                title: Some("PiP Timer".into()),
+                title: Some("PiP Stopwatch".into()),
                 appears_transparent: true,
                 traffic_light_position: Some(point(px(-200.0), px(8.0))),
             }),
@@ -261,7 +261,7 @@ fn open_timer_window(cx: &mut App) {
             is_minimizable: false,
             ..Default::default()
         },
-        |window, cx| cx.new(|cx| Timer::new(window, cx)),
+        |window, cx| cx.new(|cx| Stopwatch::new(window, cx)),
     )
     .expect("failed to open window");
     cx.activate(true);
@@ -287,15 +287,15 @@ fn main() {
                 KeyBinding::new("cmd-w", CloseWindow, None),
                 KeyBinding::new("cmd-q", Quit, None),
             ]);
-            cx.set_menus([Menu::new("Timer").items([
-                MenuItem::action("New Timer", NewWindow),
-                MenuItem::action("Close Timer", CloseWindow),
+            cx.set_menus([Menu::new("Stopwatch").items([
+                MenuItem::action("New Stopwatch", NewWindow),
+                MenuItem::action("Close Stopwatch", CloseWindow),
                 MenuItem::separator(),
-                MenuItem::action("Quit Timer", Quit),
+                MenuItem::action("Quit Stopwatch", Quit),
             ])]);
-            cx.on_action(|_: &NewWindow, cx| open_timer_window(cx));
+            cx.on_action(|_: &NewWindow, cx| open_stopwatch_window(cx));
             cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
             cx.on_action(|_: &Quit, cx| cx.quit());
-            open_timer_window(cx);
+            open_stopwatch_window(cx);
         });
 }

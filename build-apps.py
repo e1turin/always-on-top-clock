@@ -31,7 +31,11 @@ APPS = [
     App(binary="clock", name="Clock", bundle_id="com.pip-clock.clock"),
     App(binary="vertical", name="Vertical Clock", bundle_id="com.pip-clock.vertical"),
     App(binary="pomodoro", name="Pomodoro Timer", bundle_id="com.pip-clock.pomodoro"),
-    App(binary="timer", name="Timer", bundle_id="com.pip-clock.timer"),
+    App(
+        binary="stopwatch",
+        name="Stopwatch",
+        bundle_id="com.pip-clock.stopwatch",
+    ),
 ]
 
 VARIANTS = (("dark", ""), ("light", " Light"))

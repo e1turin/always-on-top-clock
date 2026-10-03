@@ -108,3 +108,7 @@ src/
 ```
 
 Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::PopUp` so macOS keeps them visible across focus changes and Spaces; their root elements activate the app on click for keyboard shortcut handling.
+
+## License
+
+This project is licensed under the [GNU General Public License, version 3 or later](./LICENSE). Third-party dependencies remain subject to their respective licenses.

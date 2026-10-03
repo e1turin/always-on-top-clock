@@ -27,8 +27,8 @@ default = []
 light-theme = []
 
 [dependencies]
-gpui = { path = "../zed/crates/gpui", features = ["font-kit"] }
-gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit"] }
+gpui = { git = "https://github.com/zed-industries/zed.git", rev = "56b1e79a5565164cd118ca6007243ea4c047f000", features = ["font-kit"] }
+gpui_platform = { git = "https://github.com/zed-industries/zed.git", rev = "56b1e79a5565164cd118ca6007243ea4c047f000", features = ["font-kit"] }
 chrono = "0.4"
 anyhow = "1.0"
-gpui_shared_string = { path = "../zed/crates/gpui_shared_string" }
+gpui_shared_string = { git = "https://github.com/zed-industries/zed.git", rev = "56b1e79a5565164cd118ca6007243ea4c047f000" }

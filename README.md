@@ -17,13 +17,7 @@ All widgets use persistent `WindowKind::PopUp` panels. They are draggable, remai
 
 ## Building
 
-Requires macOS with Xcode (for Metal shader compilation) and a local clone of [Zed](https://github.com/zed-industries/zed) one directory above:
-
-```
-parent/
-├── zed/                  # git clone https://github.com/zed-industries/zed
-└── gpui-clock-widget/    # this repo
-```
+Requires macOS with Xcode. The required [Zed](https://github.com/zed-industries/zed) crates are fetched automatically by Cargo at the commit pinned in `Cargo.toml`.
 
 The default build is dark. The `light-theme` Cargo feature selects the light theme at compile time:
 

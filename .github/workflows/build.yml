@@ -17,17 +17,6 @@ jobs:
         with:
           path: gpui-clock-widget
 
-      - name: Checkout Zed
-        uses: actions/checkout@v4
-        with:
-          repository: zed-industries/zed
-          ref: main
-          path: zed
-          fetch-depth: 1
-
-      - name: Resolve Zed commit
-        id: zed_sha
-        run: echo "sha=$(git -C zed rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Get Rust version
         id: rustc_version

@@ -63,7 +63,13 @@ To assemble bundles from binaries that are already staged there without rebuildi
 ./build-apps.py --skip-build
 ```
 
-Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Drag them to `/Applications` to install.
+Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Each bundle includes a matching dark or light icon from `assets/icons/`. Drag the apps to `/Applications` to install.
+
+The committed icon assets are ready to package and do not add a build dependency. To regenerate them after editing `misc/generate-icons.py`, install Pillow and run:
+
+```bash
+python3 misc/generate-icons.py
+```
 
 ## Gatekeeper
 

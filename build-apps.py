@@ -18,6 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 BINARY_ROOT = PROJECT_ROOT / "target" / "binaries"
 APPS_DIR = PROJECT_ROOT / "target" / "apps"
 RELEASE_DIR = PROJECT_ROOT / "target" / "release"
+ICON_ROOT = PROJECT_ROOT / "assets" / "icons"
 
 
 @dataclass
@@ -54,6 +55,8 @@ INFO_PLIST_TEMPLATE = """\
     <string>{bundle_id}</string>
     <key>CFBundleExecutable</key>
     <string>{binary}</string>
+    <key>CFBundleIconFile</key>
+    <string>{icon}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -116,9 +119,13 @@ def create_app(app: App, variant: str, name_suffix: str, binary_root: Path) -> N
     macos_dir.mkdir(parents=True, exist_ok=True)
     resources_dir.mkdir(parents=True, exist_ok=True)
 
+    icon_filename = f"{app.binary}.icns"
     (app_dir / "Contents" / "Info.plist").write_text(
         INFO_PLIST_TEMPLATE.format(
-            name=display_name, bundle_id=bundle_id, binary=app.binary
+            name=display_name,
+            bundle_id=bundle_id,
+            binary=app.binary,
+            icon=icon_filename,
         ),
         encoding="utf-8",
     )
@@ -131,6 +138,11 @@ def create_app(app: App, variant: str, name_suffix: str, binary_root: Path) -> N
     destination = macos_dir / app.binary
     shutil.copy2(source, destination)
     destination.chmod(0o755)
+
+    icon_source = ICON_ROOT / f"{app.binary}-{variant}.icns"
+    if not icon_source.is_file():
+        raise FileNotFoundError(f"missing application icon: {icon_source}")
+    shutil.copy2(icon_source, resources_dir / icon_filename)
 
     # The linker leaves binaries with an ad-hoc stub signature. Sign the bundle so
     # Gatekeeper does not treat it as damaged.

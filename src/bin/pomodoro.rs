@@ -10,7 +10,15 @@ use std::time::Instant;
 
 actions!(
     pomo,
-    [ToggleTheme, PlayPause, Skip, Reset, NewWindow, CloseWindow]
+    [
+        ToggleTheme,
+        PlayPause,
+        Skip,
+        Reset,
+        NewWindow,
+        CloseWindow,
+        Quit
+    ]
 );
 
 const WORK_SECONDS: f64 = 25.0 * 60.0;
@@ -292,13 +300,17 @@ fn main() {
             cx.bind_keys([
                 KeyBinding::new("cmd-n", NewWindow, None),
                 KeyBinding::new("cmd-w", CloseWindow, None),
+                KeyBinding::new("cmd-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Pomodoro Timer").items([
                 MenuItem::action("New Pomodoro Timer", NewWindow),
                 MenuItem::action("Close Pomodoro Timer", CloseWindow),
+                MenuItem::separator(),
+                MenuItem::action("Quit Pomodoro Timer", Quit),
             ])]);
             cx.on_action(|_: &NewWindow, cx| open_pomodoro_window(cx));
             cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            cx.on_action(|_: &Quit, cx| cx.quit());
             open_pomodoro_window(cx);
         });
 }

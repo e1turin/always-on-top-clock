@@ -45,6 +45,7 @@ Keyboard shortcuts available in every app:
 
 - `Cmd+N` opens another independent window of the same app.
 - `Cmd+W` closes the active window.
+- `Cmd+Q` closes all windows and quits the app.
 
 ## Creating .app Bundles
 

@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 
 actions!(
     timer_actions,
-    [ToggleTheme, Stop, Reset, NewWindow, CloseWindow]
+    [ToggleTheme, Stop, Reset, NewWindow, CloseWindow, Quit]
 );
 
 const WINDOW_IS_RESIZABLE: bool = false;
@@ -285,13 +285,17 @@ fn main() {
             cx.bind_keys([
                 KeyBinding::new("cmd-n", NewWindow, None),
                 KeyBinding::new("cmd-w", CloseWindow, None),
+                KeyBinding::new("cmd-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Timer").items([
                 MenuItem::action("New Timer", NewWindow),
                 MenuItem::action("Close Timer", CloseWindow),
+                MenuItem::separator(),
+                MenuItem::action("Quit Timer", Quit),
             ])]);
             cx.on_action(|_: &NewWindow, cx| open_timer_window(cx));
             cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            cx.on_action(|_: &Quit, cx| cx.quit());
             open_timer_window(cx);
         });
 }

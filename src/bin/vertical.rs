@@ -8,7 +8,7 @@ use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
 use std::time::{Duration, Instant};
 
-actions!(vertical, [ToggleTheme, NewWindow, CloseWindow]);
+actions!(vertical, [ToggleTheme, NewWindow, CloseWindow, Quit]);
 
 struct VerticalClock {
     focus_handle: FocusHandle,
@@ -126,13 +126,17 @@ fn main() {
             cx.bind_keys([
                 KeyBinding::new("cmd-n", NewWindow, None),
                 KeyBinding::new("cmd-w", CloseWindow, None),
+                KeyBinding::new("cmd-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Vertical Clock").items([
                 MenuItem::action("New Vertical Clock", NewWindow),
                 MenuItem::action("Close Vertical Clock", CloseWindow),
+                MenuItem::separator(),
+                MenuItem::action("Quit Vertical Clock", Quit),
             ])]);
             cx.on_action(|_: &NewWindow, cx| open_vertical_window(cx));
             cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            cx.on_action(|_: &Quit, cx| cx.quit());
             open_vertical_window(cx);
         });
 }

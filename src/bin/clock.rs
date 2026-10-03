@@ -8,7 +8,7 @@ use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
 use std::time::{Duration, Instant};
 
-actions!(clock, [ToggleTheme, NewWindow, CloseWindow]);
+actions!(clock, [ToggleTheme, NewWindow, CloseWindow, Quit]);
 
 struct Clock {
     focus_handle: FocusHandle,
@@ -112,13 +112,17 @@ fn main() {
             cx.bind_keys([
                 KeyBinding::new("cmd-n", NewWindow, None),
                 KeyBinding::new("cmd-w", CloseWindow, None),
+                KeyBinding::new("cmd-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Clock").items([
                 MenuItem::action("New Clock", NewWindow),
                 MenuItem::action("Close Clock", CloseWindow),
+                MenuItem::separator(),
+                MenuItem::action("Quit Clock", Quit),
             ])]);
             cx.on_action(|_: &NewWindow, cx| open_clock_window(cx));
             cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            cx.on_action(|_: &Quit, cx| cx.quit());
             open_clock_window(cx);
         });
 }

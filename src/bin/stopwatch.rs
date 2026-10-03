@@ -1,7 +1,8 @@
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
-    MenuItem, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions,
+    MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind,
+    WindowOptions,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
@@ -114,6 +115,7 @@ impl Render for Stopwatch {
 
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
+                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
                 .track_focus(&self.focus_handle)
                 .relative()
                 .size_full()
@@ -164,6 +166,7 @@ impl Render for Stopwatch {
 
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
+                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
                 .track_focus(&self.focus_handle)
                 .flex()
                 .flex_col()
@@ -248,9 +251,9 @@ fn open_stopwatch_window(cx: &mut App) {
     cx.open_window(
         WindowOptions {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
-            // PopUp windows are non-activating macOS panels and cannot reliably
-            // receive keyboard shortcuts after another stopwatch is opened.
-            kind: WindowKind::Floating,
+            // PopUp windows stay visible when the application loses focus. The
+            // root element activates the app when clicked so shortcuts still work.
+            kind: WindowKind::PopUp,
             titlebar: Some(TitlebarOptions {
                 title: Some("PiP Stopwatch".into()),
                 appears_transparent: true,

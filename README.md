@@ -11,7 +11,7 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
 | **PiP Stopwatch** | `stopwatch` | 150×150 | Stopwatch with stop/start, reset, and interval history controls |
 
-All widgets use activating `WindowKind::Floating` panels. They are draggable, remain above normal windows, hide their traffic-light controls, and reliably receive keyboard shortcuts.
+All widgets use persistent `WindowKind::PopUp` panels. They are draggable, remain visible when focus moves to another app, stay above normal and full-screen windows across Spaces, and hide their traffic-light controls. Clicking a widget activates its app so keyboard shortcuts work.
 
 ![](./misc/preview.png)
 
@@ -113,4 +113,4 @@ src/
     └── stopwatch.rs    # Stopwatch with stop/start, reset, and interval history controls
 ```
 
-Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::Floating` so macOS treats them as activating panels and routes keyboard shortcuts correctly.
+Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::PopUp` so macOS keeps them visible across focus changes and Spaces; their root elements activate the app on click for keyboard shortcut handling.

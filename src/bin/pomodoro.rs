@@ -1,8 +1,8 @@
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, rgb, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding,
-    Menu, MenuItem, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind,
-    WindowOptions,
+    Menu, MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
+    WindowKind, WindowOptions,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
@@ -149,6 +149,7 @@ impl Render for Pomodoro {
 
         div()
             .on_action(|_: &CloseWindow, window, _| window.remove_window())
+            .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
             .track_focus(&self.focus_handle)
             .flex()
             .flex_col()
@@ -265,7 +266,7 @@ fn open_pomodoro_window(cx: &mut App) {
     cx.open_window(
         WindowOptions {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
-            kind: WindowKind::Floating,
+            kind: WindowKind::PopUp,
             titlebar: Some(TitlebarOptions {
                 title: Some("PiP Pomodoro".into()),
                 appears_transparent: true,

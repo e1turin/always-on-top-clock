@@ -9,11 +9,11 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Clock** | `clock` | 300×300 | `HH:MM:SS` digital clock |
 | **PiP Vertical** | `vertical` | 300×300 | Hours over minutes in large type |
 | **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
-| **PiP Timer** | `timer` | 150×150 | Stopwatch with stop/start and reset controls |
+| **PiP Stopwatch** | `stopwatch` | 150×150 | Stopwatch with stop/start, reset, and interval history controls |
 
-All windows stay above everything (including full-screen apps) using `WindowKind::PopUp` and are draggable.
+All widgets use persistent `WindowKind::PopUp` panels. They are draggable, remain visible when focus moves to another app, stay above normal and full-screen windows across Spaces, and hide their traffic-light controls. Clicking a widget activates its app so keyboard shortcuts work.
 
-![](./misc/preview.png)
+![](./misc/preview.jpeg)
 
 ## Building
 
@@ -38,23 +38,38 @@ cargo build --release --features light-theme  # light
 cargo run --release --bin clock
 cargo run --release --bin vertical
 cargo run --release --bin pomodoro
-cargo run --release --bin timer
+cargo run --release --bin stopwatch
 ```
+
+Keyboard shortcuts available in every app:
+
+- `Cmd+N` opens another independent window of the same app.
+- `Cmd+W` closes the active window.
+- `Cmd+Q` closes all windows and quits the app.
 
 ## Creating .app Bundles
 
-`build-apps.py` only assembles app bundles; it does not compile Rust. Build both variants into the directories it expects, then run the script:
+Run the build script to compile all binaries in both dark and light variants, assemble their application bundles, and sign them ad hoc:
 
 ```bash
-mkdir -p target/binaries/{dark,light}
-cargo build --release
-find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/dark/ \;
-cargo build --release --features light-theme
-find target/release -maxdepth 1 -type f -perm -111 -exec cp {} target/binaries/light/ \;
 ./build-apps.py
 ```
 
-Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Drag them to `/Applications/` to install.
+The script enables GPUI runtime shaders, so it does not require the optional command-line Metal toolchain. Intermediate binaries are staged in `target/binaries/{dark,light}`.
+
+To assemble bundles from binaries that are already staged there without rebuilding, use:
+
+```bash
+./build-apps.py --skip-build
+```
+
+Outputs `.app` bundles to `target/apps/`. Dark apps retain their usual names; light apps have a ` Light` suffix, for example `Clock Light.app`. Each bundle includes a matching dark or light icon from `assets/icons/`. Drag the apps to `/Applications` to install.
+
+The committed icon assets are ready to package and do not add a build dependency. To regenerate them after editing `misc/generate-icons.py`, install Pillow and run:
+
+```bash
+python3 misc/generate-icons.py
+```
 
 ## Gatekeeper
 
@@ -84,7 +99,7 @@ To publish a release:
 
 2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
-The release is versioned by the tag and attaches each dark app and its light counterpart as a separate zip: `Clock.zip`, `Clock Light.zip`, `Vertical Clock.zip`, `Vertical Clock Light.zip`, `Pomodoro Timer.zip`, `Pomodoro Timer Light.zip`, `Timer.zip`, and `Timer Light.zip`.
+The release is versioned by the tag and attaches each dark app and its light counterpart as a separate zip: `Clock.zip`, `Clock Light.zip`, `Vertical Clock.zip`, `Vertical Clock Light.zip`, `Pomodoro Timer.zip`, `Pomodoro Timer Light.zip`, `Stopwatch.zip`, and `Stopwatch Light.zip`.
 
 ## Architecture
 
@@ -95,7 +110,7 @@ src/
     ├── clock.rs        # HH:MM:SS clock, ticks every second
     ├── vertical.rs     # Large hours/minutes, ticks every second
     ├── pomodoro.rs     # Phase-based timer with UI controls
-    └── timer.rs        # Stopwatch with stop/start and reset controls
+    └── stopwatch.rs    # Stopwatch with stop/start, reset, and interval history controls
 ```
 
-Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows are created with `WindowKind::PopUp` which sets `NSPopUpMenuWindowLevel` (101) and `NSWindowCollectionBehaviorCanJoinAllSpaces` — keeping the widget visible above all windows across all Spaces.
+Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::PopUp` so macOS keeps them visible across focus changes and Spaces; their root elements activate the app on click for keyboard shortcut handling.

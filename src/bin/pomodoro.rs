@@ -1,12 +1,25 @@
 use gpui::prelude::*;
 use gpui::{
-    App, Bounds, Context, FontWeight, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind, WindowOptions, actions, div, px, rgb, size,
+    actions, div, point, px, rgb, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding,
+    Menu, MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
+    WindowKind, WindowOptions,
 };
 use gpui_platform::application;
 use pip_clock::{tabular_figures, Theme};
 use std::time::Instant;
 
-actions!(pomo, [ToggleTheme, PlayPause, Skip, Reset]);
+actions!(
+    pomo,
+    [
+        ToggleTheme,
+        PlayPause,
+        Skip,
+        Reset,
+        NewWindow,
+        CloseWindow,
+        Quit
+    ]
+);
 
 const WORK_SECONDS: f64 = 25.0 * 60.0;
 const BREAK_SECONDS: f64 = 5.0 * 60.0;
@@ -19,6 +32,7 @@ const WINDOW_SIZE_X_PX: f32 = 200.0;
 const WINDOW_SIZE_Y_PX: f32 = 200.0;
 
 struct Pomodoro {
+    focus_handle: FocusHandle,
     phase: u8,
     remaining: f64,
     running: bool,
@@ -27,8 +41,12 @@ struct Pomodoro {
 }
 
 impl Pomodoro {
-    fn new() -> Self {
+    fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let focus_handle = cx.focus_handle();
+        focus_handle.focus(window, cx);
+
         Self {
+            focus_handle,
             phase: 0,
             remaining: WORK_SECONDS,
             running: false,
@@ -121,11 +139,7 @@ impl Render for Pomodoro {
         let bg = self.theme.bg();
         let fg = self.theme.fg();
         let dim = self.theme.dim();
-        let accent = if self.is_break() {
-            rgb(HEX).into()
-        } else {
-            fg
-        };
+        let accent = if self.is_break() { rgb(HEX).into() } else { fg };
 
         let mins = (self.remaining / 60.0).floor() as u32;
         let secs = (self.remaining % 60.0).floor() as u32;
@@ -134,6 +148,9 @@ impl Render for Pomodoro {
         let completed = self.completed_sessions();
 
         div()
+            .on_action(|_: &CloseWindow, window, _| window.remove_window())
+            .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+            .track_focus(&self.focus_handle)
             .flex()
             .flex_col()
             .items_center()
@@ -240,25 +257,61 @@ impl Render for Pomodoro {
     }
 }
 
-fn main() {
-    application().with_quit_mode(QuitMode::LastWindowClosed).run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                kind: WindowKind::PopUp,
-                titlebar: Some(TitlebarOptions {
-                    title: Some("PiP Pomodoro".into()),
-                    appears_transparent: true,
-                    traffic_light_position: None,
-                }),
-                is_movable: true,
-                is_resizable: WINDOW_IS_RESIZABLE,
-                ..Default::default()
-            },
-            |_, cx| cx.new(|_| Pomodoro::new()),
-        )
-        .expect("failed to open window");
-        cx.activate(true);
+fn open_pomodoro_window(cx: &mut App) {
+    let mut bounds = Bounds::centered(None, size(px(WINDOW_SIZE_X_PX), px(WINDOW_SIZE_Y_PX)), cx);
+    let cascade_offset = px((cx.windows().len() % 8) as f32 * 16.0);
+    bounds.origin.x += cascade_offset;
+    bounds.origin.y += cascade_offset;
+
+    cx.open_window(
+        WindowOptions {
+            window_bounds: Some(WindowBounds::Windowed(bounds)),
+            kind: WindowKind::PopUp,
+            titlebar: Some(TitlebarOptions {
+                title: Some("PiP Pomodoro".into()),
+                appears_transparent: true,
+                traffic_light_position: Some(point(px(-200.0), px(8.0))),
+            }),
+            is_movable: true,
+            is_resizable: WINDOW_IS_RESIZABLE,
+            is_minimizable: false,
+            ..Default::default()
+        },
+        |window, cx| cx.new(|cx| Pomodoro::new(window, cx)),
+    )
+    .expect("failed to open window");
+    cx.activate(true);
+}
+
+fn close_active_window(cx: &mut App) {
+    let window = cx.active_window().or_else(|| {
+        cx.window_stack()
+            .and_then(|windows| windows.first().copied())
     });
+
+    if let Some(window) = window {
+        let _ = window.update(cx, |_, window, _| window.remove_window());
+    }
+}
+
+fn main() {
+    application()
+        .with_quit_mode(QuitMode::LastWindowClosed)
+        .run(|cx: &mut App| {
+            cx.bind_keys([
+                KeyBinding::new("cmd-n", NewWindow, None),
+                KeyBinding::new("cmd-w", CloseWindow, None),
+                KeyBinding::new("cmd-q", Quit, None),
+            ]);
+            cx.set_menus([Menu::new("Pomodoro Timer").items([
+                MenuItem::action("New Pomodoro Timer", NewWindow),
+                MenuItem::action("Close Pomodoro Timer", CloseWindow),
+                MenuItem::separator(),
+                MenuItem::action("Quit Pomodoro Timer", Quit),
+            ])]);
+            cx.on_action(|_: &NewWindow, cx| open_pomodoro_window(cx));
+            cx.on_action(|_: &CloseWindow, cx| close_active_window(cx));
+            cx.on_action(|_: &Quit, cx| cx.quit());
+            open_pomodoro_window(cx);
+        });
 }

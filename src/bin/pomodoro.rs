@@ -4,8 +4,8 @@ use gpui::{
     Menu, MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
     WindowKind, WindowOptions,
 };
+use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
-use pip_clock::{tabular_figures, Theme};
 use std::time::Instant;
 
 actions!(

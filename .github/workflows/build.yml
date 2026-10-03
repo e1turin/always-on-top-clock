@@ -12,10 +12,10 @@ jobs:
       SCCACHE_GHA_ENABLED: "true"
       RUSTC_WRAPPER: "sccache"
     steps:
-      - name: Checkout pip-clock
+      - name: Checkout gpui-clock-widget
         uses: actions/checkout@v4
         with:
-          path: playground/pip-clock
+          path: gpui-clock-widget
 
       - name: Checkout Zed
         uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: cargo-registry-${{ runner.os }}-${{ hashFiles('playground/pip-clock/Cargo.lock') }}
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('gpui-clock-widget/Cargo.lock') }}
           restore-keys: |
             cargo-registry-${{ runner.os }}-
 
@@ -50,11 +50,11 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Build app bundles
-        working-directory: playground/pip-clock
+        working-directory: gpui-clock-widget
         run: python3 build-apps.py
 
       - name: Zip apps
-        working-directory: playground/pip-clock/target/apps
+        working-directory: gpui-clock-widget/target/apps
         run: |
           for app in *.app; do
             ditto -c -k --sequesterRsrc --keepParent "$app" "${app%.app}.zip"
@@ -67,5 +67,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: apps
-          path: playground/pip-clock/target/apps/*.zip
+          path: gpui-clock-widget/target/apps/*.zip
           if-no-files-found: error

@@ -1,6 +1,6 @@
-# PiP Clock
+# GPUI Clock Widgets
 
-Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI framework).
+Native macOS always-on-top clock widgets built with **GPUI** (Zed's GPU-accelerated UI framework).
 
 ## Apps
 
@@ -22,7 +22,7 @@ Requires macOS with Xcode (for Metal shader compilation) and a local clone of [Z
 ```
 parent/
 ├── zed/                  # git clone https://github.com/zed-industries/zed
-└── pip-clock/            # this repo
+└── gpui-clock-widget/    # this repo
 ```
 
 The default build is dark. The `light-theme` Cargo feature selects the light theme at compile time:

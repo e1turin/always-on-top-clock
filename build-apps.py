@@ -29,13 +29,13 @@ class App:
 
 
 APPS = [
-    App(binary="clock", name="Clock", bundle_id="com.pip-clock.clock"),
-    App(binary="vertical", name="Vertical Clock", bundle_id="com.pip-clock.vertical"),
-    App(binary="pomodoro", name="Pomodoro Timer", bundle_id="com.pip-clock.pomodoro"),
+    App(binary="clock", name="Clock", bundle_id="com.always-on-top-clock.clock"),
+    App(binary="vertical", name="Vertical Clock", bundle_id="com.always-on-top-clock.vertical"),
+    App(binary="pomodoro", name="Pomodoro Timer", bundle_id="com.always-on-top-clock.pomodoro"),
     App(
         binary="stopwatch",
         name="Stopwatch",
-        bundle_id="com.pip-clock.stopwatch",
+        bundle_id="com.always-on-top-clock.stopwatch",
     ),
 ]
 

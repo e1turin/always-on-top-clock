@@ -2011,6 +2011,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpui-clock-widget"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "gpui",
+ "gpui_platform",
+ "gpui_shared_string",
+]
+
+[[package]]
 name = "gpui_apple"
 version = "0.1.0"
 dependencies = [
@@ -3738,17 +3749,6 @@ name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
-
-[[package]]
-name = "pip-clock"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "gpui",
- "gpui_platform",
- "gpui_shared_string",
-]
 
 [[package]]
 name = "piper"

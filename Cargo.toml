@@ -1,5 +1,5 @@
 [package]
-name = "pip-clock"
+name = "gpui-clock-widget"
 version = "0.1.0"
 edition = "2021"
 
@@ -27,8 +27,8 @@ default = []
 light-theme = []
 
 [dependencies]
-gpui = { path = "../../zed/crates/gpui", features = ["font-kit"] }
-gpui_platform = { path = "../../zed/crates/gpui_platform", features = ["font-kit"] }
+gpui = { path = "../zed/crates/gpui", features = ["font-kit"] }
+gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit"] }
 chrono = "0.4"
 anyhow = "1.0"
-gpui_shared_string = { path = "../../zed/crates/gpui_shared_string" }
+gpui_shared_string = { path = "../zed/crates/gpui_shared_string" }

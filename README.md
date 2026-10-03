@@ -13,7 +13,7 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 
 All widgets use persistent `WindowKind::PopUp` panels. They are draggable, remain visible when focus moves to another app, stay above normal and full-screen windows across Spaces, and hide their traffic-light controls. Clicking a widget activates its app so keyboard shortcuts work.
 
-![](./misc/preview.png)
+![](./misc/preview.jpeg)
 
 ## Building
 

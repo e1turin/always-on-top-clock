@@ -11,7 +11,7 @@ Native macOS always-on-top widgets built with **GPUI** (Zed's GPU-accelerated UI
 | **PiP Pomodoro** | `pomodoro` | 200×200 | 25/5/15 min timer with session tracking |
 | **PiP Timer** | `timer` | 150×150 | Stopwatch with stop/start and reset controls |
 
-The clock and Pomodoro widgets use `WindowKind::PopUp` to remain visible across Spaces and full-screen apps. The timer uses an activating `WindowKind::Floating` panel so its `Cmd+N` and `Cmd+W` shortcuts receive keyboard focus reliably. All widgets are draggable and remain above normal windows.
+All widgets use activating `WindowKind::Floating` panels. They are draggable, remain above normal windows, hide their traffic-light controls, and reliably receive keyboard shortcuts.
 
 ![](./misc/preview.png)
 
@@ -41,10 +41,10 @@ cargo run --release --bin pomodoro
 cargo run --release --bin timer
 ```
 
-Timer keyboard shortcuts:
+Keyboard shortcuts available in every app:
 
-- `Cmd+N` opens another independent timer window.
-- `Cmd+W` closes the active timer window.
+- `Cmd+N` opens another independent window of the same app.
+- `Cmd+W` closes the active window.
 
 ## Creating .app Bundles
 
@@ -106,4 +106,4 @@ src/
     └── timer.rs        # Stopwatch with stop/start and reset controls
 ```
 
-Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Clock and Pomodoro windows use `WindowKind::PopUp`; timer windows use `WindowKind::Floating` so macOS treats them as activating panels and routes keyboard shortcuts correctly.
+Each binary is a standalone GPUI application using `gpui_platform::application()` as the entry point. Windows use `WindowKind::Floating` so macOS treats them as activating panels and routes keyboard shortcuts correctly.

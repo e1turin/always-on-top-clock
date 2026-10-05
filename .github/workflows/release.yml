@@ -48,15 +48,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          has_apps=$(gh api "repos/${{ github.repository }}/actions/runs/${{ steps.find_run.outputs.run_id }}/artifacts" --jq '[.artifacts[] | select(.name == "apps")] | length')
-          if [ "$has_apps" -eq 0 ]; then
-            echo "::error::Build run ${{ steps.find_run.outputs.run_id }} has no 'apps' artifact, so it was created with an older version of the Build workflow. Re-tag the release commit (or create a new tag) so its build uses the current build.yml, wait for the build to finish, then re-run this workflow."
-            exit 1
-          fi
-          gh run download --repo "${{ github.repository }}" "${{ steps.find_run.outputs.run_id }}" --name apps --dir apps
+          artifacts=$(gh api "repos/${{ github.repository }}/actions/runs/${{ steps.find_run.outputs.run_id }}/artifacts")
+          for artifact in apps windows-apps; do
+            count=$(echo "$artifacts" | jq --arg name "$artifact" '[.artifacts[] | select(.name == $name)] | length')
+            if [ "$count" -eq 0 ]; then
+              echo "::error::Build run ${{ steps.find_run.outputs.run_id }} has no '$artifact' artifact. Re-tag the release commit (or create a new tag), wait for its Build workflow to finish, then re-run this workflow."
+              exit 1
+            fi
+            gh run download --repo "${{ github.repository }}" "${{ steps.find_run.outputs.run_id }}" --name "$artifact" --dir "$artifact"
+          done
 
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ inputs.tag }}" apps/*.zip --verify-tag --generate-notes
+          gh release create "${{ inputs.tag }}" apps/*.zip windows-apps/*.zip --verify-tag --generate-notes

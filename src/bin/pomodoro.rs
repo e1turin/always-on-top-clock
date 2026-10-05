@@ -1,3 +1,5 @@
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, rgb, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding,
@@ -299,9 +301,9 @@ fn main() {
         .with_quit_mode(QuitMode::LastWindowClosed)
         .run(|cx: &mut App| {
             cx.bind_keys([
-                KeyBinding::new("cmd-n", NewWindow, None),
-                KeyBinding::new("cmd-w", CloseWindow, None),
-                KeyBinding::new("cmd-q", Quit, None),
+                KeyBinding::new("secondary-n", NewWindow, None),
+                KeyBinding::new("secondary-w", CloseWindow, None),
+                KeyBinding::new("secondary-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Pomodoro Timer").items([
                 MenuItem::action("New Pomodoro Timer", NewWindow),

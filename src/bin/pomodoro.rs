@@ -4,7 +4,7 @@ use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, rgb, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding,
     Menu, MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
-    WindowKind, WindowOptions,
+    WindowControlArea, WindowKind, WindowOptions,
 };
 use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
@@ -162,6 +162,7 @@ impl Render for Pomodoro {
             .bg(bg)
             .child(
                 div()
+                    .window_control_area(WindowControlArea::Drag)
                     .flex()
                     .flex_col()
                     .items_center()

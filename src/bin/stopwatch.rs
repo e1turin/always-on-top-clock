@@ -3,8 +3,8 @@
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
-    MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind,
-    WindowOptions,
+    MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
+    WindowControlArea, WindowKind, WindowOptions,
 };
 use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
@@ -124,6 +124,15 @@ impl Render for Stopwatch {
                 .bg(bg)
                 .child(
                     div()
+                        .absolute()
+                        .top_1()
+                        .left_8()
+                        .right_1()
+                        .h_6()
+                        .window_control_area(WindowControlArea::Drag),
+                )
+                .child(
+                    div()
                         .id("intervals")
                         .flex()
                         .flex_col()
@@ -178,6 +187,7 @@ impl Render for Stopwatch {
                 .bg(bg)
                 .child(
                     div()
+                        .window_control_area(WindowControlArea::Drag)
                         .text_3xl()
                         .font_weight(FontWeight::BOLD)
                         .font_features(tabular_figures())

@@ -4,7 +4,7 @@ use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
     MenuItem, MouseButton, QuitMode, Render, SharedString, TitlebarOptions, Window, WindowBounds,
-    WindowKind, WindowOptions,
+    WindowControlArea, WindowKind, WindowOptions,
 };
 use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
@@ -53,6 +53,7 @@ impl Render for Clock {
         div()
             .on_action(|_: &CloseWindow, window, _| window.remove_window())
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+            .window_control_area(WindowControlArea::Drag)
             .track_focus(&self.focus_handle)
             .flex()
             .flex_col()

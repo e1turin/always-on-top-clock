@@ -118,19 +118,11 @@ impl Render for Stopwatch {
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .relative()
                 .size_full()
                 .bg(bg)
-                .child(
-                    div()
-                        .absolute()
-                        .top_1()
-                        .left_8()
-                        .right_1()
-                        .h_6()
-                        .window_control_area(WindowControlArea::Drag),
-                )
                 .child(
                     div()
                         .id("intervals")
@@ -150,6 +142,7 @@ impl Render for Stopwatch {
                 .child(
                     div()
                         .id("back")
+                        .occlude()
                         .absolute()
                         .top_1()
                         .left_1()
@@ -178,6 +171,7 @@ impl Render for Stopwatch {
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .flex()
                 .flex_col()
@@ -187,7 +181,6 @@ impl Render for Stopwatch {
                 .bg(bg)
                 .child(
                     div()
-                        .window_control_area(WindowControlArea::Drag)
                         .text_3xl()
                         .font_weight(FontWeight::BOLD)
                         .font_features(tabular_figures())
@@ -202,6 +195,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("count")
+                                .occlude()
                                 .w_6()
                                 .flex()
                                 .items_center()
@@ -218,6 +212,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("stop")
+                                .occlude()
                                 .px_2()
                                 .rounded_full()
                                 .border_dashed()
@@ -234,6 +229,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("reset")
+                                .occlude()
                                 .px_2()
                                 .rounded_full()
                                 .border_dashed()

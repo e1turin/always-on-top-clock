@@ -152,6 +152,7 @@ impl Render for Pomodoro {
         div()
             .on_action(|_: &CloseWindow, window, _| window.remove_window())
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+            .window_control_area(WindowControlArea::Drag)
             .track_focus(&self.focus_handle)
             .flex()
             .flex_col()
@@ -162,7 +163,6 @@ impl Render for Pomodoro {
             .bg(bg)
             .child(
                 div()
-                    .window_control_area(WindowControlArea::Drag)
                     .flex()
                     .flex_col()
                     .items_center()
@@ -202,6 +202,7 @@ impl Render for Pomodoro {
                     .child(
                         div()
                             .id("play")
+                            .occlude()
                             .w_8()
                             .h_8()
                             .rounded_full()
@@ -221,6 +222,7 @@ impl Render for Pomodoro {
                     .child(
                         div()
                             .id("skip")
+                            .occlude()
                             .w_8()
                             .h_8()
                             .rounded_full()
@@ -240,6 +242,7 @@ impl Render for Pomodoro {
                     .child(
                         div()
                             .id("reset")
+                            .occlude()
                             .w_8()
                             .h_8()
                             .rounded_full()

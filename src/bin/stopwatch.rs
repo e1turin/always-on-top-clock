@@ -1,8 +1,10 @@
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
-    MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds, WindowKind,
-    WindowOptions,
+    MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
+    WindowControlArea, WindowKind, WindowOptions,
 };
 use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
@@ -116,6 +118,7 @@ impl Render for Stopwatch {
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .relative()
                 .size_full()
@@ -139,6 +142,7 @@ impl Render for Stopwatch {
                 .child(
                     div()
                         .id("back")
+                        .occlude()
                         .absolute()
                         .top_1()
                         .left_1()
@@ -167,6 +171,7 @@ impl Render for Stopwatch {
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .flex()
                 .flex_col()
@@ -190,6 +195,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("count")
+                                .occlude()
                                 .w_6()
                                 .flex()
                                 .items_center()
@@ -206,6 +212,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("stop")
+                                .occlude()
                                 .px_2()
                                 .rounded_full()
                                 .border_dashed()
@@ -222,6 +229,7 @@ impl Render for Stopwatch {
                         .child(
                             div()
                                 .id("reset")
+                                .occlude()
                                 .px_2()
                                 .rounded_full()
                                 .border_dashed()
@@ -286,9 +294,9 @@ fn main() {
         .with_quit_mode(QuitMode::LastWindowClosed)
         .run(|cx: &mut App| {
             cx.bind_keys([
-                KeyBinding::new("cmd-n", NewWindow, None),
-                KeyBinding::new("cmd-w", CloseWindow, None),
-                KeyBinding::new("cmd-q", Quit, None),
+                KeyBinding::new("secondary-n", NewWindow, None),
+                KeyBinding::new("secondary-w", CloseWindow, None),
+                KeyBinding::new("secondary-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Stopwatch").items([
                 MenuItem::action("New Stopwatch", NewWindow),

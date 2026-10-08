@@ -1,8 +1,10 @@
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+
 use gpui::prelude::*;
 use gpui::{
     actions, div, point, px, size, App, Bounds, Context, FocusHandle, FontWeight, KeyBinding, Menu,
     MenuItem, MouseButton, QuitMode, Render, SharedString, TitlebarOptions, Window, WindowBounds,
-    WindowKind, WindowOptions,
+    WindowControlArea, WindowKind, WindowOptions,
 };
 use gpui_clock_widget::{tabular_figures, Theme};
 use gpui_platform::application;
@@ -51,6 +53,7 @@ impl Render for Clock {
         div()
             .on_action(|_: &CloseWindow, window, _| window.remove_window())
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+            .window_control_area(WindowControlArea::Drag)
             .track_focus(&self.focus_handle)
             .flex()
             .flex_col()
@@ -111,9 +114,9 @@ fn main() {
         .with_quit_mode(QuitMode::LastWindowClosed)
         .run(|cx: &mut App| {
             cx.bind_keys([
-                KeyBinding::new("cmd-n", NewWindow, None),
-                KeyBinding::new("cmd-w", CloseWindow, None),
-                KeyBinding::new("cmd-q", Quit, None),
+                KeyBinding::new("secondary-n", NewWindow, None),
+                KeyBinding::new("secondary-w", CloseWindow, None),
+                KeyBinding::new("secondary-q", Quit, None),
             ]);
             cx.set_menus([Menu::new("Clock").items([
                 MenuItem::action("New Clock", NewWindow),

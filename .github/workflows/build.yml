@@ -3,10 +3,12 @@ name: Build
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-macos:
+    name: Build macOS apps
     runs-on: macos-14
     env:
       SCCACHE_GHA_ENABLED: "true"
@@ -52,9 +54,41 @@ jobs:
       - name: Show sccache stats
         run: sccache --show-stats
 
-      - name: Upload app zips
+      - name: Upload macOS app zips
         uses: actions/upload-artifact@v4
         with:
           name: apps
           path: gpui-clock-widget/target/apps/*.zip
+          if-no-files-found: error
+
+  build-windows:
+    name: Build Windows apps
+    runs-on: windows-2022
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout gpui-clock-widget
+        uses: actions/checkout@v4
+        with:
+          path: gpui-clock-widget
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('gpui-clock-widget/Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-${{ runner.os }}-
+
+      - name: Build Windows archives
+        working-directory: gpui-clock-widget
+        run: python build-windows.py
+
+      - name: Upload Windows app zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-apps
+          path: gpui-clock-widget/target/windows-apps/*-Windows.zip
           if-no-files-found: error

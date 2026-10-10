@@ -138,10 +138,18 @@ impl Render for Pomodoro {
         }
         window.request_animation_frame();
 
-        let bg = self.theme.bg();
         let fg = self.theme.fg();
+        let bg = if self.is_break() {
+            rgb(HEX).into()
+        } else {
+            self.theme.bg()
+        };
         let dim = self.theme.dim();
-        let accent = if self.is_break() { rgb(HEX).into() } else { fg };
+        let accent = fg;
+        let break_remaining_indicator = match self.theme {
+            Theme::Dark => rgb(0x999999).into(),
+            Theme::Light => rgb(0x666666).into(),
+        };
 
         let mins = (self.remaining / 60.0).floor() as u32;
         let secs = (self.remaining % 60.0).floor() as u32;
@@ -189,7 +197,17 @@ impl Render for Pomodoro {
                             .gap_2()
                             .justify_center()
                             .children((0..4).map(|i| {
-                                let color = if i < completed { accent } else { dim };
+                                let color = if self.is_break() {
+                                    if i < completed {
+                                        fg
+                                    } else {
+                                        break_remaining_indicator
+                                    }
+                                } else if i < completed {
+                                    accent
+                                } else {
+                                    dim
+                                };
                                 div().w_2().h_2().rounded_full().bg(color)
                             })),
                     ),

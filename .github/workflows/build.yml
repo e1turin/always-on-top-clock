@@ -92,3 +92,47 @@ jobs:
           name: windows-apps
           path: gpui-clock-widget/target/windows-apps/*-Windows.zip
           if-no-files-found: error
+
+  build-linux:
+    name: Build Linux apps
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout gpui-clock-widget
+        uses: actions/checkout@v4
+        with:
+          path: gpui-clock-widget
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            libfontconfig-dev \
+            libx11-xcb-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            libwayland-dev
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('gpui-clock-widget/Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-${{ runner.os }}-
+
+      - name: Build Linux archives
+        working-directory: gpui-clock-widget
+        run: python3 build-linux.py
+
+      - name: Upload Linux app zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-apps
+          path: gpui-clock-widget/target/linux-apps/*-Linux.zip
+          if-no-files-found: error

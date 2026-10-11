@@ -49,7 +49,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           artifacts=$(gh api "repos/${{ github.repository }}/actions/runs/${{ steps.find_run.outputs.run_id }}/artifacts")
-          for artifact in apps windows-apps; do
+          for artifact in apps windows-apps linux-apps; do
             count=$(echo "$artifacts" | jq --arg name "$artifact" '[.artifacts[] | select(.name == $name)] | length')
             if [ "$count" -eq 0 ]; then
               echo "::error::Build run ${{ steps.find_run.outputs.run_id }} has no '$artifact' artifact. Re-tag the release commit (or create a new tag), wait for its Build workflow to finish, then re-run this workflow."
@@ -62,4 +62,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ inputs.tag }}" apps/*.zip windows-apps/*.zip --verify-tag --generate-notes
+          gh release create "${{ inputs.tag }}" apps/*.zip windows-apps/*.zip linux-apps/*.zip --verify-tag --generate-notes

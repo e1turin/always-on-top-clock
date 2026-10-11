@@ -21,6 +21,7 @@ The required [Zed](https://github.com/zed-industries/zed) crates are fetched aut
 
 - **macOS:** Xcode.
 - **Windows:** Visual Studio Build Tools with the Desktop development with C++ workload and a Windows 10 or 11 SDK. GPUI's release build uses the SDK's `fxc.exe` shader compiler.
+- **Linux:** a recent Linux distribution with development packages for Fontconfig, Wayland, X11/XCB, and xkbcommon (on Debian/Ubuntu: `libfontconfig-dev libwayland-dev libx11-xcb-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libxkbcommon-x11-dev`).
 
 The default build is dark. The `light-theme` Cargo feature selects the light theme at compile time:
 
@@ -84,6 +85,22 @@ The committed icon assets are ready to package and do not add a build dependency
 python3 misc/generate-icons.py
 ```
 
+## Creating Linux Packages
+
+Run the Linux packaging script from a Linux shell:
+
+```bash
+python3 build-linux.py
+```
+
+It compiles all binaries in dark and light variants and outputs standalone ZIP archives to `target/linux-apps/`, such as `Clock-Linux.zip` and `Clock Light-Linux.zip`. Each archive contains the corresponding executable and the project license. To package binaries already staged in `target/linux-binaries/{dark,light}`, use:
+
+```bash
+python3 build-linux.py --skip-build
+```
+
+Extract an archive and run its executable; no installer is currently provided. The CI artifacts are built on Ubuntu 22.04 for `x86_64` Linux systems.
+
 ## Gatekeeper
 
 The bundles are signed ad-hoc during `build-apps.py`, so macOS won't treat them as damaged. However, because they are not signed with a Developer ID or notarized, the first time you open a downloaded app you'll get the "Apple cannot check it for malicious software" dialog. To open it:
@@ -99,7 +116,7 @@ For a fully seamless install (no warning at all), the app needs to be signed wit
 
 ## CI / Releases
 
-The `Build` workflow runs on every push to `main`, on version tags matching `v*`, and when started manually. It builds the macOS `.app` archives and Windows `.exe` archives in separate jobs, uploading them as `apps` and `windows-apps` artifacts. It does not create releases.
+The `Build` workflow runs on every push to `main`, on version tags matching `v*`, and when started manually. It builds the macOS `.app` archives, Windows `.exe` archives, and Linux executable archives in separate jobs, uploading them as `apps`, `windows-apps`, and `linux-apps` artifacts. It does not create releases.
 
 To publish a release:
 
@@ -112,7 +129,7 @@ To publish a release:
 
 2. Once that build for tag succeeds, go to the **Actions** tab, open the `Release` workflow, and run it manually, entering the tag (e.g. `v1.0.0`) as input.
 
-The release is versioned by the tag and attaches each dark app and its light counterpart as a separate ZIP. macOS archives retain names such as `Clock.zip` and `Clock Light.zip`; Windows archives use names such as `Clock-Windows.zip` and `Clock Light-Windows.zip`.
+The release is versioned by the tag and attaches each dark app and its light counterpart as a separate ZIP. macOS archives retain names such as `Clock.zip` and `Clock Light.zip`; Windows archives use names such as `Clock-Windows.zip` and `Clock Light-Windows.zip`; Linux archives use names such as `Clock-Linux.zip` and `Clock Light-Linux.zip`.
 
 ## Architecture
 

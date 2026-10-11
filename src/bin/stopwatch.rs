@@ -6,7 +6,7 @@ use gpui::{
     MenuItem, MouseButton, QuitMode, Render, TitlebarOptions, Window, WindowBounds,
     WindowControlArea, WindowKind, WindowOptions,
 };
-use gpui_clock_widget::{tabular_figures, Theme};
+use gpui_clock_widget::{start_window_drag, tabular_figures, Theme};
 use gpui_platform::application;
 use std::time::{Duration, Instant};
 
@@ -117,7 +117,10 @@ impl Render for Stopwatch {
 
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
-                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .on_mouse_down(MouseButton::Left, |_, window, cx| {
+                    cx.activate(true);
+                    start_window_drag(window);
+                })
                 .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .relative()
@@ -170,7 +173,10 @@ impl Render for Stopwatch {
 
             div()
                 .on_action(|_: &CloseWindow, window, _| window.remove_window())
-                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.activate(true))
+                .on_mouse_down(MouseButton::Left, |_, window, cx| {
+                    cx.activate(true);
+                    start_window_drag(window);
+                })
                 .window_control_area(WindowControlArea::Drag)
                 .track_focus(&self.focus_handle)
                 .flex()

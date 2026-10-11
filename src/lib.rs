@@ -1,10 +1,18 @@
-use gpui::{rgb, FontFeatures, Hsla};
+use gpui::{rgb, FontFeatures, Hsla, Window};
 use std::sync::Arc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Theme {
     Dark,
     Light,
+}
+
+/// Hands window movement over to the compositor / window manager. On Linux,
+/// `WindowControlArea::Drag` is ignored, so dragging must be started manually;
+/// Windows and macOS already handle it via the control area.
+pub fn start_window_drag(_window: &Window) {
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    _window.start_window_move();
 }
 
 /// Enables the OpenType `tnum` (tabular figures) feature, making all digits
